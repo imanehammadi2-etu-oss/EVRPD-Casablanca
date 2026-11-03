@@ -1,0 +1,79 @@
+# ===============================================================================
+# Configuration Centrale de Forecasting & Intégration EVRPD
+# ===============================================================================
+
+data:
+  source_type: "orders"  # "orders" ou "aggregated_demand"
+  timestamp_column: "created_at"
+  zone_column: "zone_id"
+  order_id_column: "order_id"
+  demand_column: "demand"
+  quantity_column: "quantity"
+  frequency: "1h"
+  timezone: "Africa/Casablanca"
+  processed_output_path: "data/processed/demand_by_zone_hour.csv"
+
+stl:
+  enabled: true
+  mode: "analysis_only"  # "analysis_only" ou "feature_input"
+  target_column: "demand"
+  robust: true
+  daily_period: 24
+  weekly_period: 168
+  selected_period: 24
+  add_components_as_features: false
+  save_figures: true
+  output_figures_dir: "outputs/figures"
+
+horizons:
+  active_profile: "short_term"
+  
+  short_term:
+    context_length: 168
+    prediction_length: 24
+    frequency: "1h"
+    window_stride: 1
+    description: "Affectation quotidienne de flotte, tournées, recharge VE, replanification"
+    
+  extended_short_term:
+    context_length: 336
+    prediction_length: 72
+    frequency: "1h"
+    window_stride: 1
+    description: "Planification de 1 à 3 jours, anticipation des pics"
+    
+  medium_term:
+    context_length: 720
+    prediction_length: 168
+    frequency: "1h"
+    window_stride: 1
+    description: "Planification tactique de capacité et besoin de véhicules"
+    
+  long_term:
+    context_length: 365
+    prediction_length: 30
+    frequency: "1d"
+    window_stride: 1
+    description: "Stratégie, capacité dépôts, bornes de recharge"
+
+split:
+  method: "chronological"
+  train_ratio: 0.70
+  validation_ratio: 0.15
+  test_ratio: 0.15
+  rolling_origin_enabled: true
+  rolling_origin_n_splits: 3
+
+evaluation:
+  primary_metric: "mae"
+  secondary_metrics:
+    - "rmse"
+    - "smape"
+    - "mase"
+  peak_hours: [8, 9, 10, 15, 16, 17]
+
+uncertainty:
+  policy: "auto_consensus_buffer"
+  service_level_buffer: 0.10
+  low_quantile: 0.15
+  high_quantile: 0.85

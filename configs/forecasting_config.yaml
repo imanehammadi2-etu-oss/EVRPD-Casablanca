@@ -1,0 +1,170 @@
+# ===============================================================================
+# Configuration Globale du Pipeline Scientifique de Forecasting Multivarié
+# File: configs/forecasting_config.yaml
+# ===============================================================================
+
+data:
+  timestamp_column: "timestamp"
+  id_column: "unique_id"
+  target_columns:
+    - "demand"
+  feature_columns:
+    - "demand"
+    - "traffic_index"
+    - "temperature"
+    - "wind_speed"
+    - "rain"
+    - "hour"
+    - "day_of_week"
+    - "is_weekend"
+    - "is_holiday"
+  frequency: "h"
+  timezone: "Africa/Casablanca"
+  missing_value_policy: "interpolate" # interpolate, ffill, zero
+  scaling_method: "standard"          # standard, robust, minmax, revin
+
+split:
+  method: "chronological"
+  train_ratio: 0.70
+  validation_ratio: 0.15
+  test_ratio: 0.15
+  rolling_origin_enabled: true
+  rolling_origin_n_splits: 3
+
+stl:
+  enabled: true
+  target_column: "demand"
+  period: 24
+  robust: true
+  save_figures: true
+
+forecasting:
+  context_length: 48
+  prediction_length: 24
+  window_stride: 1
+  target_mode: "single_target" # single_target ou multi_target
+
+patching:
+  enabled: true
+  patch_length: 12
+  patch_stride: 6
+  padding_mode: null
+
+# Configurations par modèle
+models:
+  seasonal_naive:
+    enabled: true
+    seasonality_period: 24
+    seed: 42
+
+  xgboost:
+    enabled: true
+    n_estimators: 100
+    max_depth: 6
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    seed: 42
+
+  lstm:
+    enabled: true
+    hidden_size: 128
+    num_layers: 2
+    dropout: 0.10
+    learning_rate: 0.001
+    batch_size: 32
+    max_epochs: 50
+    early_stopping_patience: 10
+    seed: 42
+
+  custom_gpt:
+    enabled: true
+    d_model: 256
+    n_heads: 8
+    n_layers: 4
+    d_ff: 1024
+    dropout: 0.10
+    attention_dropout: 0.10
+    learning_rate: 0.0001
+    batch_size: 32
+    max_epochs: 50
+    early_stopping_patience: 10
+    optimizer: "adamw"
+    weight_decay: 0.0001
+    use_revin: true
+    seed: 42
+
+  informer:
+    enabled: true
+    label_length: 48
+    attn: "prob"
+    factor: 5
+    d_model: 256
+    n_heads: 8
+    e_layers: 3
+    d_layers: 2
+    d_ff: 1024
+    dropout: 0.10
+    activation: "gelu"
+    distil: true
+    learning_rate: 0.0001
+    batch_size: 32
+    max_epochs: 50
+    early_stopping_patience: 10
+    optimizer: "adamw"
+    weight_decay: 0.0001
+    seed: 42
+
+  lstn:
+    enabled: true
+    rnn_type: "LSTM"
+    rnn_hidden_size: 128
+    rnn_num_layers: 2
+    d_model: 128
+    n_heads: 4
+    n_transformer_layers: 2
+    d_ff: 512
+    dropout: 0.10
+    learning_rate: 0.001
+    batch_size: 32
+    max_epochs: 50
+    early_stopping_patience: 10
+    optimizer: "adamw"
+    weight_decay: 0.0001
+    seed: 42
+
+forecasting_agent:
+  enabled: true
+  strategy: "weighted_ensemble" # best_model, weighted_ensemble
+  candidate_models:
+    - "seasonal_naive"
+    - "xgboost"
+    - "lstm"
+    - "custom_gpt"
+    - "informer"
+    - "lstn"
+  selection_metric: "MAE"
+  weights_method: "inverse_error"
+  consensus_enabled: true
+  uncertainty_threshold: 0.75
+  retraining_frequency_hours: 24
+  fallback_model: "seasonal_naive"
+
+hpo:
+  enabled: true
+  framework: "optuna"
+  sampler: "TPESampler"
+  pruner: "HyperbandPruner"
+  n_trials: 30
+  direction: "minimize"
+  objective_metric: "MAE"
+  max_epochs_per_trial: 30
+  n_startup_trials: 5
+  seed: 42
+
+output_dirs:
+  forecasts: "outputs/forecasts"
+  metrics: "outputs/metrics"
+  figures: "outputs/figures"
+  models: "outputs/models"
+  hpo: "outputs/hpo"
