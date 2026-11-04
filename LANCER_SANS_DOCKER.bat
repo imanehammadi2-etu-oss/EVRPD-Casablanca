@@ -16,18 +16,19 @@ echo [2/3] Verification des bibliotheques Python...
 python -m pip install -r requirements.txt --quiet
 
 echo.
-echo [3/3] Demarrage du serveur Web Streamlit...
+echo [3/3] Demarrage du serveur Web Streamlit sur le port 8515...
 echo ==============================================================================
-echo   L'application s'ouvre sur : http://localhost:8501
+echo   L'application s'ouvre sur : http://localhost:8515
+echo   Accessible egalement sur le reseau local (ex: http://192.168.1.42:8515 ou http://192.168.1.43:8515)
 echo   (Pour fermer l'application, fermez simplement cette fenetre)
 echo ==============================================================================
 echo.
 
 REM Lancement du navigateur
-start http://localhost:8501
+start http://localhost:8515
 
-REM Execution de Streamlit
-python -m streamlit run streamlit_app.py --server.port=8501 --server.address=0.0.0.0
+REM Execution de Streamlit sur le port 8515
+python -m streamlit run streamlit_app.py --server.port=8515 --server.address=0.0.0.0
 goto END
 
 :NO_PYTHON

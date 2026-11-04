@@ -9,9 +9,11 @@ services:
     container_name: evrpd_casablanca_dashboard
     restart: unless-stopped
     ports:
-      - "8501:8501"
+      # Port 8515 (plage 8510-8520). Écoute sur 0.0.0.0 (permet l'accès via 192.168.1.42:8515 ou 192.168.1.43:8515)
+      # Possibilité de spécifier une IP fixe via APP_IP=192.168.1.42 ou 192.168.1.43
+      - "${APP_IP:-0.0.0.0}:8515:8515"
     environment:
-      - STREAMLIT_SERVER_PORT=8501
+      - STREAMLIT_SERVER_PORT=8515
       - STREAMLIT_SERVER_ADDRESS=0.0.0.0
       - STREAMLIT_SERVER_HEADLESS=true
       - STREAMLIT_BROWSER_GATHER_USAGE_STATS=false
@@ -20,3 +22,13 @@ services:
       - ./clients_database.json:/app/clients_database.json
       - ./simulation_records.json:/app/simulation_records.json
       - ./simulation_records_agentic.json:/app/simulation_records_agentic.json
+    networks:
+      - evrpd_network
+
+networks:
+  evrpd_network:
+    driver: bridge
+    ipam:
+      config:
+        # Sous-réseau Docker dédié (172.28.0.0/16) isolant le conteneur pour exclure 192.168.1.40
+        - subnet: 172.28.0.0/16

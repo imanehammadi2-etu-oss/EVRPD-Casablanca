@@ -29,12 +29,12 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copie de l'intégralité du projet et des données
 COPY . .
 
-# Port d'écoute de l'application Web Streamlit
-EXPOSE 8501
+# Port d'écoute de l'application Web Streamlit (Port configuré entre 8510 et 8520 : 8515)
+EXPOSE 8515
 
-# Vérification de santé du conteneur (Healthcheck natif Streamlit)
+# Vérification de santé du conteneur (Healthcheck natif Streamlit sur le port 8515)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-    CMD curl --fail http://localhost:8501/_stcore/health || exit 1
+    CMD curl --fail http://localhost:8515/_stcore/health || exit 1
 
-# Démarrage direct du dashboard
-ENTRYPOINT ["streamlit", "run", "streamlit_app.py", "--server.port=8501", "--server.address=0.0.0.0"]
+# Démarrage direct du dashboard sur le port 8515
+ENTRYPOINT ["streamlit", "run", "streamlit_app.py", "--server.port=8515", "--server.address=0.0.0.0"]

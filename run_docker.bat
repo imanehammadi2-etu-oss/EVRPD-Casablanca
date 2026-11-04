@@ -15,19 +15,20 @@ IF %ERRORLEVEL% NEQ 0 (
     exit /b 1
 )
 
-echo [1/2] Construction et demarrage du conteneur Docker...
+echo [1/2] Construction et demarrage du conteneur Docker (Port 8515)...
 docker compose up -d --build
 
 echo.
 echo [2/2] Conteneur demarre avec succes !
 echo ==============================================================================
-echo   L'application est disponible a l'adresse :
-echo   http://localhost:8501
+echo   L'application est disponible aux adresses :
+echo   - Local :      http://localhost:8515
+echo   - Reseau IP :  http://192.168.1.42:8515 ou http://192.168.1.43:8515
 echo ==============================================================================
 echo.
 
 REM Ouvrir automatiquement le navigateur par defaut
-start http://localhost:8501
+start http://localhost:8515
 
 echo Appuyez sur une touche pour afficher les logs en direct (Ctrl+C pour quitter)...
 docker compose logs -f
