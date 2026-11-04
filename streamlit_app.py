@@ -3997,36 +3997,25 @@ elif current_view == "Analytics & KPI":
                         """, unsafe_allow_html=True)
 
     # -------------------------------------------------------------------------
-    # ONGLET 4 : DYNAMIQUE BATTERIES & LIVRAISONS MODALES
+    # ONGLET 4 : DYNAMIQUE BATTERIES DES VÉHICULES ÉLECTRIQUES
     # -------------------------------------------------------------------------
     with tab_kpi4:
-        col_c1, col_c2 = st.columns(2)
-        with col_c1:
-            with st.container(border=True):
-                st.markdown('<div class="saas-card-title">⚡ Répartition Modale des Livraisons</div>', unsafe_allow_html=True)
-                labels = ['Véhicules Électriques (VE)', 'Drones Urbains']
-                values = [82, 18]
-                fig_pie = go.Figure(data=[go.Pie(labels=labels, values=values, hole=.5, marker_colors=['#2563EB', '#6366F1'])])
-                fig_pie.update_layout(paper_bgcolor="#FFFFFF", plot_bgcolor="#FFFFFF", margin=dict(l=10, r=10, t=10, b=10))
-                st.plotly_chart(fig_pie, use_container_width=True)
-                
-        with col_c2:
-            with st.container(border=True):
-                st.markdown('<div class="saas-card-title">🔋 Décharge des Batteries VE au fil des Tournées</div>', unsafe_allow_html=True)
-                heures_srv = [f"{h:02d}:00" for h in range(8, 19)]
-                soc_ve1 = [100, 93, 85, 78, 68, 60, 52, 45, 38, 30, 25]
-                soc_ve2 = [100, 90, 81, 72, 65, 54, 46, 39, 31, 24, 18]
-                fig_soc = go.Figure()
-                fig_soc.add_trace(go.Scatter(x=heures_srv, y=soc_ve1, mode='lines+markers', name='VE #01 (Maarif - Anfa)', line=dict(color='#2563EB', width=2)))
-                fig_soc.add_trace(go.Scatter(x=heures_srv, y=soc_ve2, mode='lines+markers', name='VE #02 (Sidi Maarouf - Oulfa)', line=dict(color='#10B981', width=2)))
-                fig_soc.update_layout(
-                    yaxis_title="État de Charge SoC (%)",
-                    paper_bgcolor="#FFFFFF",
-                    plot_bgcolor="#F8FAFC",
-                    font_color="#0F172A",
-                    margin=dict(l=20, r=20, t=20, b=20)
-                )
-                st.plotly_chart(fig_soc, use_container_width=True)
+        with st.container(border=True):
+            st.markdown('<div class="saas-card-title">🔋 Décharge des Batteries VE au fil des Tournées</div>', unsafe_allow_html=True)
+            heures_srv = [f"{h:02d}:00" for h in range(8, 19)]
+            soc_ve1 = [100, 93, 85, 78, 68, 60, 52, 45, 38, 30, 25]
+            soc_ve2 = [100, 90, 81, 72, 65, 54, 46, 39, 31, 24, 18]
+            fig_soc = go.Figure()
+            fig_soc.add_trace(go.Scatter(x=heures_srv, y=soc_ve1, mode='lines+markers', name='VE #01 (Maarif - Anfa)', line=dict(color='#2563EB', width=2)))
+            fig_soc.add_trace(go.Scatter(x=heures_srv, y=soc_ve2, mode='lines+markers', name='VE #02 (Sidi Maarouf - Oulfa)', line=dict(color='#10B981', width=2)))
+            fig_soc.update_layout(
+                yaxis_title="État de Charge SoC (%)",
+                paper_bgcolor="#FFFFFF",
+                plot_bgcolor="#F8FAFC",
+                font_color="#0F172A",
+                margin=dict(l=20, r=20, t=20, b=20)
+            )
+            st.plotly_chart(fig_soc, use_container_width=True)
 
     # -------------------------------------------------------------------------
     # ONGLET 5 : REGISTRE & HISTORIQUE DES SIMULATIONS (agentic_results_panel.py)
