@@ -2602,28 +2602,108 @@ elif current_view == "Live Architecture":
                 st.info(f"**🔄 Flux I/O :** {info['io']}")
                 st.success(f"**📍 Métropole de Casablanca :** {info['casablanca']}")
 
+    # -------------------------------------------------------------------------
+    # DÉFINITION DU GRAPHISME DU PIPELINE COMPLET : 8 COLONNES · 26 NŒUDS · 29 FLUX
+    # -------------------------------------------------------------------------
+    nodes_layout = {
+        # Col 1: Ingestion (x = 110)
+        "DemandeNHPP": {"x": 110, "y": 85, "w": 145, "h": 50, "col": "#06B6D4", "title": "Demande NHPP", "sub": "Poisson Non-Homogène"},
+        "Meteo": {"x": 110, "y": 185, "w": 145, "h": 50, "col": "#06B6D4", "title": "Météo Casablanca", "sub": "Temp, Vent, Pluie API"},
+        "Trafic": {"x": 110, "y": 285, "w": 145, "h": 50, "col": "#06B6D4", "title": "Trafic & Congestion", "sub": "Index Heures de Pointe"},
+        "Calendrier": {"x": 110, "y": 385, "w": 145, "h": 50, "col": "#06B6D4", "title": "Calendrier & Fêtes", "sub": "Ramadan & Fériés Maroc"},
+
+        # Col 2: Prétraitement STL (x = 320)
+        "Sync": {"x": 320, "y": 135, "w": 145, "h": 50, "col": "#A855F7", "title": "Sync Multivariée", "sub": "Africa/Casablanca UTC+1"},
+        "STL": {"x": 320, "y": 240, "w": 145, "h": 50, "col": "#A855F7", "title": "Décomposition STL", "sub": "Xt = Tt + St + Rt"},
+        "Patching": {"x": 320, "y": 345, "w": 145, "h": 50, "col": "#A855F7", "title": "Patching 3D & RevIN", "sub": "Canaux O(N^2) + Normal."},
+
+        # Col 3: HPO & Débat LLM (x = 540)
+        "HPO_Optuna": {"x": 480, "y": 145, "w": 125, "h": 50, "col": "#F59E0B", "title": "Optuna TPE", "sub": "Bayesian Multi-Trial"},
+        "Agentic_Debate": {"x": 615, "y": 145, "w": 125, "h": 50, "col": "#F59E0B", "title": "Débat Multi-Agents", "sub": "Web, Scholar, Reasoner"},
+        "Judge_LLM": {"x": 545, "y": 320, "w": 145, "h": 52, "col": "#F43F5E", "title": "Juge LLM Arbitre", "sub": "Synthèse Paramétrique"},
+
+        # Col 4: Modèles IA Spatio-Temporels (x = 750)
+        "PatchTST": {"x": 750, "y": 135, "w": 145, "h": 50, "col": "#3B82F6", "title": "PatchTST", "sub": "Channel-Independent"},
+        "CustomGPT": {"x": 750, "y": 240, "w": 145, "h": 50, "col": "#3B82F6", "title": "Custom GPT Forecaster", "sub": "Causal Masked Attention"},
+        "LSTN": {"x": 750, "y": 345, "w": 145, "h": 50, "col": "#3B82F6", "title": "LSTN Transformer", "sub": "Long & Short Term Dual"},
+
+        # Col 5: Consensus & Benchmark (x = 960)
+        "Ensemble": {"x": 960, "y": 135, "w": 145, "h": 50, "col": "#10B981", "title": "Méta-Modèle Ensemble", "sub": "Pondération Inv-Variance"},
+        "Consensus": {"x": 960, "y": 240, "w": 145, "h": 50, "col": "#10B981", "title": "Score de Consensus", "sub": "Variance Accord < 0.15"},
+        "Benchmark": {"x": 960, "y": 345, "w": 145, "h": 50, "col": "#14B8A6", "title": "Benchmark Métriques", "sub": "MAE, RMSE, sMAPE, R²"},
+
+        # Col 6: OSRM & Tampon Réel (x = 1170)
+        "EVRPD_Buffer": {"x": 1170, "y": 135, "w": 145, "h": 50, "col": "#F43F5E", "title": "Tampon Incertitude", "sub": "Marge Sécurité 5-25%"},
+        "Clients_DB": {"x": 1170, "y": 240, "w": 145, "h": 50, "col": "#06B6D4", "title": "Base Clients Casa", "sub": "3 000 Adresses Géo"},
+        "OSRM_Matrix": {"x": 1170, "y": 345, "w": 145, "h": 50, "col": "#F59E0B", "title": "Matrice Rues OSRM", "sub": "Distances & Temps Réels"},
+
+        # Col 7: Solveur EVRPD Flotte Mixte (x = 1380)
+        "Flotte_Mixte": {"x": 1380, "y": 105, "w": 145, "h": 50, "col": "#3B82F6", "title": "Flotte 50 VE + 100 Dr", "sub": "Capacités & Portée 12 km"},
+        "Batteries_NFZ": {"x": 1380, "y": 205, "w": 145, "h": 50, "col": "#EF4444", "title": "Batteries & 5 NFZ", "sub": "SoC > 15% & Zones Vol"},
+        "RendezVous": {"x": 1380, "y": 305, "w": 145, "h": 50, "col": "#10B981", "title": "Rendez-vous VE-Drone", "sub": "Décollage & Atterrissage"},
+        "EVRPD_Export": {"x": 1380, "y": 405, "w": 145, "h": 50, "col": "#EAB308", "title": "Solveur MAPPO/NSGA-II", "sub": "Bi-objectif Coût & CO2"},
+
+        # Col 8: Restitution Cartographique & SaaS (x = 1575)
+        "Folium_Map": {"x": 1575, "y": 145, "w": 140, "h": 50, "col": "#A855F7", "title": "Cartographie Folium", "sub": "Tracés Rues Casablanca"},
+        "KPIs_Dashboard": {"x": 1575, "y": 255, "w": 140, "h": 50, "col": "#10B981", "title": "KPIs & Décharge VE", "sub": "km, kWh, CO2 ASIFE"},
+        "Registre_SaaS": {"x": 1575, "y": 365, "w": 140, "h": 50, "col": "#38BDF8", "title": "Registre Simulations", "sub": "JSON, CSV, Export Excel"}
+    }
+
+    edges_list = [
+        ("DemandeNHPP", "Sync", "#06B6D4"),
+        ("Meteo", "Sync", "#06B6D4"),
+        ("Trafic", "Sync", "#06B6D4"),
+        ("Calendrier", "Sync", "#06B6D4"),
+        ("Sync", "STL", "#A855F7"),
+        ("STL", "Patching", "#A855F7"),
+        ("Patching", "HPO_Optuna", "#F59E0B"),
+        ("Patching", "Agentic_Debate", "#F59E0B"),
+        ("HPO_Optuna", "Judge_LLM", "#F59E0B"),
+        ("Agentic_Debate", "Judge_LLM", "#F59E0B"),
+        ("Judge_LLM", "PatchTST", "#3B82F6"),
+        ("Judge_LLM", "CustomGPT", "#3B82F6"),
+        ("Judge_LLM", "LSTN", "#3B82F6"),
+        ("PatchTST", "Ensemble", "#3B82F6"),
+        ("CustomGPT", "Ensemble", "#3B82F6"),
+        ("LSTN", "Ensemble", "#3B82F6"),
+        ("Ensemble", "Consensus", "#10B981"),
+        ("Consensus", "Benchmark", "#10B981"),
+        ("Consensus", "EVRPD_Buffer", "#EAB308"),
+        ("EVRPD_Buffer", "Clients_DB", "#F43F5E"),
+        ("Clients_DB", "OSRM_Matrix", "#06B6D4"),
+        ("OSRM_Matrix", "EVRPD_Export", "#F59E0B"),
+        ("Clients_DB", "Flotte_Mixte", "#3B82F6"),
+        ("Flotte_Mixte", "Batteries_NFZ", "#3B82F6"),
+        ("Batteries_NFZ", "RendezVous", "#EF4444"),
+        ("RendezVous", "EVRPD_Export", "#10B981"),
+        ("EVRPD_Export", "Folium_Map", "#A855F7"),
+        ("EVRPD_Export", "KPIs_Dashboard", "#10B981"),
+        ("KPIs_Dashboard", "Registre_SaaS", "#38BDF8")
+    ]
+
     # Helper de génération du code SVG complet avec passage lumineux animé
     def generate_pipeline_svg_html(step_idx=0, height=490):
-        s_info = step_info_map[step_idx]
-        act_nodes = set(s_info["active_nodes"])
+        s_info = step_info_map.get(step_idx, step_info_map[0])
+        act_nodes = set(s_info.get("active_nodes", []))
         is_glob = (step_idx == 0)
 
-        # Mapping étape -> arêtes actives (indices 0 à 19)
         step_edges_map = {
-            0: set(range(20)),
+            0: set(range(len(edges_list))),
             1: {0, 1, 2, 3},
             2: {4, 5},
             3: {6, 7},
             4: {8, 9},
             5: {10, 11, 12},
-            6: {13, 14, 15, 16},
-            7: {16, 17},
-            8: {18, 19}
+            6: {13, 14, 15, 16, 17},
+            7: {18, 19, 20},
+            8: {21, 22, 23, 24, 25, 26, 27, 28}
         }
-        active_edge_indices = step_edges_map.get(step_idx, set(range(20))) if not is_glob else set(range(20))
+        active_edge_indices = step_edges_map.get(step_idx, set(range(len(edges_list)))) if not is_glob else set(range(len(edges_list)))
 
         svg_edges = []
         for idx, (src_id, dst_id, col) in enumerate(edges_list):
+            if src_id not in nodes_layout or dst_id not in nodes_layout:
+                continue
             s = nodes_layout[src_id]
             d = nodes_layout[dst_id]
             is_edge_active = is_glob or (idx in active_edge_indices)
@@ -2640,33 +2720,29 @@ elif current_view == "Live Architecture":
                 y2 = d["y"] - d["h"] / 2
                 mid_y = (y1 + y2) / 2
                 path_d = f"M {x1} {y1} L {x1} {mid_y} L {x2} {mid_y} L {x2} {y2}"
+            elif src_id in ("Clients_DB", "Flotte_Mixte", "Batteries_NFZ", "RendezVous") and dst_id in ("Flotte_Mixte", "Batteries_NFZ", "RendezVous", "EVRPD_Export"):
+                mid_x = (x1 + x2) / 2
+                path_d = f"M {x1} {y1} L {mid_x} {y1} L {mid_x} {y2} L {x2} {y2}"
             else:
                 mid_x = (x1 + x2) / 2
                 path_d = f"M {x1} {y1} L {mid_x} {y1} L {mid_x} {y2} L {x2} {y2}"
 
             if is_edge_active:
-                # Arête laser lumineuse avec animation de flux
                 edge_svg = f'<path d="{path_d}" fill="none" stroke="{col}" stroke-width="2.6" opacity="0.95" class="laser-active" filter="url(#glow-particle)"/>'
-                
-                # Double photon lumineux voyageant le long de la ligne
-                p1 = f'''<circle r="4" fill="{col}" filter="url(#glow-particle)">
+                p1 = f"""<circle r="4" fill="{col}" filter="url(#glow-particle)">
                     <animateMotion path="{path_d}" dur="2.0s" repeatCount="indefinite" />
                 </circle>
                 <circle r="2.2" fill="#FFFFFF">
                     <animateMotion path="{path_d}" dur="2.0s" repeatCount="indefinite" />
-                </circle>'''
-                
-                p2 = f'''<circle r="3" fill="{col}" opacity="0.8" filter="url(#glow-particle)">
+                </circle>"""
+                p2 = f"""<circle r="3" fill="{col}" opacity="0.8" filter="url(#glow-particle)">
                     <animateMotion path="{path_d}" dur="2.0s" begin="-1.0s" repeatCount="indefinite" />
-                </circle>'''
-                
-                # Anneau récepteur au nœud cible avec radar pulse
-                target_ping = f'''<circle cx="{x2}" cy="{y2}" r="3.5" fill="{col}"/>
+                </circle>"""
+                target_ping = f"""<circle cx="{x2}" cy="{y2}" r="3.5" fill="{col}"/>
                 <circle cx="{x2}" cy="{y2}" r="6" fill="none" stroke="{col}" stroke-width="1.5">
                     <animate attributeName="r" values="3;7.5;3" dur="1.5s" repeatCount="indefinite"/>
                     <animate attributeName="opacity" values="0.9;0.1;0.9" dur="1.5s" repeatCount="indefinite"/>
-                </circle>'''
-                
+                </circle>"""
                 svg_edges.append(f"{edge_svg}\n{p1}\n{p2}\n{target_ping}")
             else:
                 edge_svg = f'<path d="{path_d}" fill="none" stroke="#334155" stroke-width="1.2" opacity="0.20" stroke-dasharray="4,4"/>'
@@ -2689,15 +2765,13 @@ elif current_view == "Live Architecture":
             if is_active:
                 if not is_glob:
                     active_chip = f'<rect x="{x_left + n["w"] - 40}" y="{y_top - 7}" width="38" height="14" rx="4" fill="{n["col"]}"/><text x="{x_left + n["w"] - 21}" y="{y_top + 4}" fill="#000000" font-size="8.5" font-weight="900" text-anchor="middle">ACTIF</text>'
-                
-                # Balise lumineuse pulsante
-                pulse_beacon = f'''
+                pulse_beacon = f"""
                 <circle cx="{x_left + 14}" cy="{y_top + 18}" r="4" fill="{n['col']}">
                     <animate attributeName="r" values="3.5;6.5;3.5" dur="1.8s" repeatCount="indefinite"/>
                     <animate attributeName="opacity" values="1;0.35;1" dur="1.8s" repeatCount="indefinite"/>
                 </circle>
                 <circle cx="{x_left + 14}" cy="{y_top + 18}" r="2.2" fill="#FFFFFF"/>
-                '''
+                """
             else:
                 pulse_beacon = f'<circle cx="{x_left + 14}" cy="{y_top + 18}" r="3.5" fill="{n["col"]}" opacity="0.4"/>'
 
@@ -2713,15 +2787,17 @@ elif current_view == "Live Architecture":
 </g>""")
 
         col_headers = [
-            (100, "1. INGESTION (4 SOURCES)", "#06B6D4"),
-            (300, "2. PRÉTRAITEMENT STL", "#A855F7"),
-            (520, "3. HPO & DÉBAT LLM", "#F59E0B"),
+            (110, "1. INGESTION (4 FLUX)", "#06B6D4"),
+            (320, "2. PRÉTRAITEMENT STL", "#A855F7"),
+            (540, "3. HPO & DÉBAT LLM", "#F59E0B"),
             (750, "4. MODÈLES IA (3)", "#3B82F6"),
-            (955, "5. CONSENSUS & BENCHMARK", "#10B981"),
-            (1130, "6. EXPORT EVRPD", "#EAB308")
+            (960, "5. CONSENSUS & SCORE", "#10B981"),
+            (1170, "6. OSRM & TAMPON", "#F43F5E"),
+            (1380, "7. SOLVEUR EVRPD", "#EAB308"),
+            (1575, "8. RESTITUTION SAAS", "#A855F7")
         ]
         svg_col_headers = "".join([
-            f'<text x="{cx}" y="32" fill="{col}" font-size="10" font-weight="900" font-family="monospace" text-anchor="middle" letter-spacing="1">{txt}</text>'
+            f'<text x="{cx}" y="28" fill="{col}" font-size="10" font-weight="900" font-family="monospace" text-anchor="middle" letter-spacing="1">{txt}</text>'
             for cx, txt, col in col_headers
         ])
 
@@ -2753,7 +2829,7 @@ elif current_view == "Live Architecture":
 </head>
 <body>
 <div class="canvas-box">
-<svg width="100%" height="{height}" viewBox="0 0 1220 480" xmlns="http://www.w3.org/2000/svg">
+<svg width="100%" height="{height}" viewBox="0 0 1670 480" xmlns="http://www.w3.org/2000/svg">
   <defs>
     <filter id="glow-particle" x="-50%" y="-50%" width="200%" height="200%">
       <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
@@ -2764,173 +2840,27 @@ elif current_view == "Live Architecture":
       </feMerge>
     </filter>
   </defs>
-  <!-- Lignes directrices de fond -->
-  <line x1="200" y1="45" x2="200" y2="465" stroke="#1E293B" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
-  <line x1="400" y1="45" x2="400" y2="465" stroke="#1E293B" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
-  <line x1="660" y1="45" x2="660" y2="465" stroke="#1E293B" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
-  <line x1="855" y1="45" x2="855" y2="465" stroke="#1E293B" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
-  <line x1="1050" y1="45" x2="1050" y2="465" stroke="#1E293B" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
+  <!-- Lignes directrices de fond pour les 8 colonnes -->
+  <line x1="215" y1="40" x2="215" y2="465" stroke="#1E293B" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
+  <line x1="430" y1="40" x2="430" y2="465" stroke="#1E293B" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
+  <line x1="645" y1="40" x2="645" y2="465" stroke="#1E293B" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
+  <line x1="855" y1="40" x2="855" y2="465" stroke="#1E293B" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
+  <line x1="1065" y1="40" x2="1065" y2="465" stroke="#1E293B" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
+  <line x1="1275" y1="40" x2="1275" y2="465" stroke="#1E293B" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
+  <line x1="1480" y1="40" x2="1480" y2="465" stroke="#1E293B" stroke-width="1" stroke-dasharray="4,4" opacity="0.4"/>
   
-  <!-- En-têtes de colonnes -->
+  <!-- En-têtes des 8 colonnes complètes -->
   {svg_col_headers}
   
-  <!-- Arêtes / Flux orthogonaux avec Passage Lumineux -->
+  <!-- 29 Flux orthogonaux avec Passage Lumineux -->
   {all_edges_str}
   
-  <!-- Nœuds avec Balises Lumineuses -->
+  <!-- 26 Nœuds avec Balises Lumineuses -->
   {all_nodes_str}
 </svg>
 </div>
 </body>
 </html>"""
-
-    # Layout Barre Supérieure avec Touche Diaporama & Synchronisation Live Système
-    sys_info = step_info_map.get(sys_step, step_info_map[0])
-    
-    with st.container(border=True):
-        # 1. Bandeau de Suivi en Direct du Système
-        sync_c1, sync_c2 = st.columns([3.0, 1.3])
-        with sync_c1:
-            step_badge_txt = "🌐 VUE GLOBALE" if sys_step == 0 else f"ÉTAPE {sys_step} / 08 · {sys_info['title'].split('·')[-1].strip() if '·' in sys_info['title'] else sys_info['title']}"
-            st.markdown(f"""
-            <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 14px; height: 14px; border-radius: 50%; background: #10B981; box-shadow: 0 0 12px #10B981; flex-shrink: 0;"></div>
-                <div>
-                    <div style="font-size: 13.5px; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px;">
-                        <span>📍 ÉTAT RÉEL DU SYSTÈME EN DIRECT :</span>
-                        <span style="color: {sys_info['color']}; background: #0F172A; padding: 2px 8px; border-radius: 6px; font-family: monospace; font-size: 12px;">
-                            {step_badge_txt}
-                        </span>
-                    </div>
-                    <div style="font-size: 12px; color: #64748B; margin-top: 2px;">
-                        Dernière action exécutée : <strong style="color: #0F172A;">{sys_status}</strong> {f'· ({sys_time})' if sys_time else ''}
-                    </div>
-                </div>
-            </div>
-            """, unsafe_allow_html=True)
-        with sync_c2:
-            if cur_s_idx != sys_step and sys_step > 0:
-                if st.button(f"🎯 Caler sur l'état système (Étape {sys_step})", key="btn_sync_sys_step", use_container_width=True, type="primary"):
-                    st.session_state["arch_step"] = sys_step
-                    st.rerun()
-            else:
-                st.markdown("""
-                <div style="text-align: right; padding-top: 4px;">
-                    <span style="background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; font-family: monospace;">
-                        ✓ Schéma Synchronisé
-                    </span>
-                </div>
-                """, unsafe_allow_html=True)
-
-        st.markdown("<div style='border-top: 1px solid #E2E8F0; margin: 8px 0 10px 0;'></div>", unsafe_allow_html=True)
-
-        # 2. En-tête de l'étape affichée & Diaporama
-        col_ctrl1, col_ctrl2 = st.columns([2.3, 1.7])
-        with col_ctrl1:
-            st.markdown(f"""
-            <div style="font-size: 15px; font-weight: 800; color: #1E40AF; display: flex; align-items: center; gap: 8px;">
-                <span>{cur_info['title']}</span>
-            </div>
-            <div style="font-size: 13px; color: #64748B; margin-top: 2px;">
-                {cur_info['subtitle']}
-            </div>
-            """, unsafe_allow_html=True)
-        with col_ctrl2:
-            col_d_btn, col_d_badge = st.columns([1.2, 1.1])
-            with col_d_btn:
-                if st.button("🖥️ Mode Diaporama", key="btn_trigger_arch_diapo", type="primary", use_container_width=True, help="Ouvrir le mode présentation plein écran du pipeline"):
-                    trigger_arch_diapo = True
-            with col_d_badge:
-                badge_bg = "#10B981" if (cur_s_idx == sys_step or cur_s_idx == 0) else "#3B82F6"
-                badge_txt = "● SYNCHRONISÉ" if cur_s_idx == sys_step else "● NAVIGATION"
-                st.markdown(f"""
-                <div style="text-align: right; margin-top: 3px;">
-                    <span style="background: {badge_bg}; color: white; padding: 6px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; font-family: monospace; display: inline-block;">
-                        {badge_txt}
-                    </span>
-                </div>
-                """, unsafe_allow_html=True)
-
-        # 3. Boutons de navigation pas-à-pas avec indicateur LIVE sur l'étape du système
-        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
-        b_c0, b_c1, b_c2, b_c3, b_c4, b_c5, b_c6, b_c7, b_c8 = st.columns(9)
-        step_btns_def = [
-            (b_c0, 0, "🌐 Vue Globale"),
-            (b_c1, 1, "1. Ingestion"),
-            (b_c2, 2, "2. Prétraitement"),
-            (b_c3, 3, "3. HPO & Débat"),
-            (b_c4, 4, "4. Juge LLM"),
-            (b_c5, 5, "5. Modèles IA"),
-            (b_c6, 6, "6. Consensus"),
-            (b_c7, 7, "7. OSRM & Tampon"),
-            (b_c8, 8, "8. Solveur EVRPD")
-        ]
-        for col_b, s_idx, lbl in step_btns_def:
-            with col_b:
-                is_sys = (s_idx == sys_step and sys_step > 0)
-                display_lbl = f"{lbl} ●" if is_sys else lbl
-                b_type = "primary" if cur_s_idx == s_idx else "secondary"
-                if st.button(display_lbl, key=f"arch_btn_{s_idx}", use_container_width=True, type=b_type, help=f"Étape où se trouve actuellement le système ({sys_status})" if is_sys else None):
-                    st.session_state["arch_step"] = s_idx
-                    st.rerun()
-
-    # -------------------------------------------------------------------------
-    # CANVAS GRAPHIQUE SVG HAUTE FIDÉLITÉ (18 NŒUDS · 20 FLUX AVEC PASSAGE LUMINEUX)
-    # -------------------------------------------------------------------------
-    nodes_layout = {
-        # Col 1: Inputs (x = 100)
-        "DemandeNHPP": {"x": 100, "y": 90, "w": 140, "h": 52, "col": "#06B6D4", "title": "Demande NHPP", "sub": "Poisson Non-Homogène"},
-        "Meteo": {"x": 100, "y": 195, "w": 140, "h": 52, "col": "#06B6D4", "title": "Météo Casablanca", "sub": "Temp, Vent, Pluie API"},
-        "Trafic": {"x": 100, "y": 300, "w": 140, "h": 52, "col": "#06B6D4", "title": "Trafic & Congestion", "sub": "Index Heures de Pointe"},
-        "Calendrier": {"x": 100, "y": 405, "w": 140, "h": 52, "col": "#06B6D4", "title": "Calendrier & Fêtes", "sub": "Ramadan & Fériés Maroc"},
-
-        # Col 2: Preprocessing (x = 300)
-        "Sync": {"x": 300, "y": 140, "w": 145, "h": 52, "col": "#A855F7", "title": "Sync Multivariée", "sub": "Africa/Casablanca UTC+1"},
-        "STL": {"x": 300, "y": 250, "w": 145, "h": 52, "col": "#A855F7", "title": "Décomposition STL", "sub": "Xt = Tt + St + Rt"},
-        "Patching": {"x": 300, "y": 360, "w": 145, "h": 52, "col": "#A855F7", "title": "Patching 3D & RevIN", "sub": "Canaux O(N^2) + Normal."},
-
-        # Col 3: HPO & LLM (x = 490)
-        "HPO_Optuna": {"x": 450, "y": 150, "w": 135, "h": 52, "col": "#F59E0B", "title": "Optuna TPE Engine", "sub": "Bayesian Multi-Trial"},
-        "Agentic_Debate": {"x": 595, "y": 150, "w": 135, "h": 52, "col": "#F59E0B", "title": "Débat Multi-Agents", "sub": "Web, Scholar, Reasoner"},
-        "Judge_LLM": {"x": 520, "y": 330, "w": 150, "h": 54, "col": "#F43F5E", "title": "Juge LLM Arbitre", "sub": "Synthèse Paramétrique"},
-
-        # Col 4: Modèles IA (x = 750)
-        "PatchTST": {"x": 750, "y": 140, "w": 145, "h": 52, "col": "#3B82F6", "title": "PatchTST", "sub": "Channel-Independent"},
-        "CustomGPT": {"x": 750, "y": 250, "w": 145, "h": 52, "col": "#3B82F6", "title": "Custom GPT Forecaster", "sub": "Causal Masked Attention"},
-        "LSTN": {"x": 750, "y": 360, "w": 145, "h": 52, "col": "#3B82F6", "title": "LSTN Transformer", "sub": "Long & Short Term Dual"},
-
-        # Col 5: Consensus & Benchmark (x = 955)
-        "Ensemble": {"x": 955, "y": 150, "w": 145, "h": 52, "col": "#10B981", "title": "Méta-Modèle Ensemble", "sub": "Pondération Inv-Variance"},
-        "Consensus": {"x": 955, "y": 260, "w": 145, "h": 52, "col": "#10B981", "title": "Score de Consensus", "sub": "Variance Accord < 0.15"},
-        "Benchmark": {"x": 955, "y": 370, "w": 145, "h": 52, "col": "#14B8A6", "title": "Benchmark Métriques", "sub": "MAE, RMSE, sMAPE, R²"},
-
-        # Col 6: Export EVRPD (x = 1130)
-        "EVRPD_Buffer": {"x": 1130, "y": 200, "w": 135, "h": 52, "col": "#F43F5E", "title": "Tampon Incertitude", "sub": "Marge Sécurité 5-25%"},
-        "EVRPD_Export": {"x": 1130, "y": 320, "w": 135, "h": 52, "col": "#EAB308", "title": "Solveur EVRPD", "sub": "MAPPO / NSGA-II Hybride"}
-    }
-
-    edges_list = [
-        ("DemandeNHPP", "Sync", "#06B6D4"),
-        ("Meteo", "Sync", "#06B6D4"),
-        ("Trafic", "Sync", "#06B6D4"),
-        ("Calendrier", "Sync", "#06B6D4"),
-        ("Sync", "STL", "#A855F7"),
-        ("STL", "Patching", "#A855F7"),
-        ("Patching", "HPO_Optuna", "#F59E0B"),
-        ("Patching", "Agentic_Debate", "#F59E0B"),
-        ("HPO_Optuna", "Judge_LLM", "#F59E0B"),
-        ("Agentic_Debate", "Judge_LLM", "#F59E0B"),
-        ("Judge_LLM", "PatchTST", "#3B82F6"),
-        ("Judge_LLM", "CustomGPT", "#3B82F6"),
-        ("Judge_LLM", "LSTN", "#3B82F6"),
-        ("PatchTST", "Ensemble", "#3B82F6"),
-        ("CustomGPT", "Ensemble", "#3B82F6"),
-        ("LSTN", "Ensemble", "#3B82F6"),
-        ("Ensemble", "Consensus", "#10B981"),
-        ("Consensus", "Benchmark", "#10B981"),
-        ("Consensus", "EVRPD_Buffer", "#EAB308"),
-        ("EVRPD_Buffer", "EVRPD_Export", "#EAB308")
-    ]
 
     # Emplacement dynamique pour le SVG (permet l'animation en direct pendant la simulation)
     svg_placeholder = st.empty()
