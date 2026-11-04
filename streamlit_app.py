@@ -1999,24 +1999,148 @@ elif current_view == "Live Architecture":
 
     step_info_map = {
         0: {
-            "title": "🌐 Vue d'Ensemble Complète du Pipeline (18 Nœuds · 20 Flux)",
-            "subtitle": "Workflow intégral de bout en bout : de l'ingestion multivariée jusqu'au routage opérationnel camion-drone.",
+            "title": "🌐 Vue d'Ensemble Complète du Système (8 Grandes Phases · 36 Sous-Étapes)",
+            "subtitle": "Workflow intégral de bout en bout : de l'ingestion multivariée urbaine jusqu'au routage opérationnel camion-drone et la restitution SaaS.",
             "color": "#38BDF8",
             "active_nodes": ["DemandeNHPP", "Meteo", "Trafic", "Calendrier", "Sync", "STL", "Patching", "HPO_Optuna", "Agentic_Debate", "Judge_LLM", "PatchTST", "CustomGPT", "LSTN", "Ensemble", "Consensus", "Benchmark", "EVRPD_Buffer", "EVRPD_Export"],
-            "desc": "L'architecture relie 4 sources de données hétérogènes à Casablanca, les synchronise en UTC+1, extrait les composantes STL et patches 3D, optimise les hyperparamètres via Optuna et débat multi-agents, entraîne 3 architectures profondes en compétition, fusionne un consensus robuste et l'injecte dans le solveur de routage hybride VE-Drones.",
-            "math": r"\text{Pipeline Complet : } \mathcal{D}_{\text{brute}} \xrightarrow{\text{STL / RevIN}} \mathbf{X}_{3D} \xrightarrow{\text{HPO / LLM}} \mathbf{\Theta}^* \xrightarrow{\text{Deep IA}} \{\hat{y}_m\} \xrightarrow{\text{Consensus}} \hat{\mathbf{Y}} \xrightarrow{\text{Tampon}} \text{EVRPD}(\text{VE}, \text{Drone})",
-            "io": "Entrée : 4 flux horaires (Demande, Météo, Trafic, Calendrier) ➔ Sortie : Tournées optimales des 50 Véhicules Électriques et 100 Drones.",
-            "casablanca": "Couvre la métropole de Casablanca (Maarif, Sidi Belyout, Ain Sebaa, Oulfa, etc.) avec 3000 clients et contraintes réelles OSRM et NFZ."
+            "desc": "L'architecture relie l'ensemble des 8 grandes phases du système : Ingestion des 4 sources de Casablanca, Prétraitement STL et RevIN, Optimisation HPO bayésienne et Débat Multi-Agents, Entraînement des 3 modèles profonds de séries temporelles, Consensus scientifique, Injection stochastique avec matrices OSRM réelles, Solveur algorithmique hybride EVRPD (flotte VE + drones + NFZ + batteries), et Restitution cartographique interactive Folium avec registre de simulation.",
+            "math": r"\text{Système Complet : } \mathcal{D}_{\text{urbain}} \xrightarrow{\text{STL / RevIN}} \mathbf{X}_{3D} \xrightarrow{\text{HPO / LLM}} \mathbf{\Theta}^* \xrightarrow{\text{IA}} \hat{\mathbf{Y}} \xrightarrow{\text{OSRM / Buffer}} \text{EVRPD}(\text{VE}, \text{Drone}, \text{NFZ}, \text{SoC}) \xrightarrow{\text{Folium}} \text{Dashboard}",
+            "io": "Entrée : Flux horaires multivariés (Demande, Météo, Trafic, Calendrier) & Graphe routier OSRM ➔ Sortie : Tournées optimales des 50 Véhicules Électriques et 100 Drones, métriques énergétiques et cartographie interactive.",
+            "casablanca": "Couvre la métropole de Casablanca (Maârif, Sidi Belyout, Aïn Sebaâ, Oulfa, Sidi Bernoussi, etc.) avec 3 000 clients réels, contraintes OSRM et 5 No-Fly Zones.",
+            "sub_steps": [
+                {
+                    "id": "0.1",
+                    "short_title": "Ingestion 4 Flux",
+                    "title": "Ingestion Multivariée des 4 Sources Spatio-Temporelles",
+                    "desc": "Capture continue à granularité horaire de la demande de colis, de la météo OpenWeather en direct, du trafic routier OSRM et du calendrier marocain.",
+                    "math": r"\mathbf{Z}(t) = [D(t), \, \text{Météo}(t), \, \text{Trafic}(t), \, \text{Cal}(t)]^T \in \mathbb{R}^4",
+                    "io": "Sources brutes (APIs, capteurs) ➔ Matrice multivariée brute Z (8 760h à 26 280h)",
+                    "file": "forecasting/data_pipeline.py",
+                    "casablanca": "Modélisation sur les 3 zones types de Casablanca (Tertiaire, Industrielle, Résidentielle)."
+                },
+                {
+                    "id": "0.2",
+                    "short_title": "Prétraitement & STL",
+                    "title": "Synchronisation UTC+1, Décomposition STL & Patching 3D (RevIN)",
+                    "desc": "Alignement sur l'heure de Casablanca, séparation tendance/saisonnalités/résidu, et découpage en patches 3D avec normalisation réversible.",
+                    "math": r"X_t = T_t + S_t + R_t \quad;\quad \mathbf{P} \in \mathbb{R}^{B \times M \times P \times N}",
+                    "io": "Matrice multivariée brute ➔ Tenseur de patches normalisés prêt pour Transformers",
+                    "file": "forecasting/preprocessing.py & decomposition.py",
+                    "casablanca": "Neutralisation des perturbations non-stationnaires et capture des cycles de pointe 08h-18h."
+                },
+                {
+                    "id": "0.3",
+                    "short_title": "HPO & Débat LLM",
+                    "title": "Recherche Bayésienne Optuna TPE & Débat Contradictoire Multi-Agents",
+                    "desc": "Optimisation conjointe par algorithme TPE sur 50 essais et confrontation de 3 agents IA (Web, Scholar, Reasoner) arbitrée par un Juge LLM.",
+                    "math": r"\theta^* = \arg\min_{\theta \in \Omega} \mathbb{E}[\mathcal{L}_{\text{MSE}}] \quad;\quad \text{Score}_{\text{Juge}}(\theta)",
+                    "io": "Espace de recherche Omega ➔ Configuration optimale theta* validée et figée",
+                    "file": "forecasting/hpo/agentic_hpo.py & optuna_hpo.py",
+                    "casablanca": "Ajustement aux variations brutales de la météo côtière atlantique de Casablanca."
+                },
+                {
+                    "id": "0.4",
+                    "short_title": "Modèles IA & Inférence",
+                    "title": "Entraînement & Inférence Parallèle des 3 Architectures Profondes",
+                    "desc": "Inférence concurrente des 3 architectures complémentaires : PatchTST (Channel-Independent), Custom GPT (Causal Masked) et LSTN (Hybride Récurrent).",
+                    "math": r"\hat{y}_{\text{PatchTST}}, \, \hat{y}_{\text{GPT}}, \, \hat{y}_{\text{LSTN}} = f_{\theta^*}(\mathbf{P})",
+                    "io": "Tenseur de patches 3D ➔ 3 séries prédictives indépendantes par quartier",
+                    "file": "forecasting/models/",
+                    "casablanca": "Prévisions heure par heure de la demande de colis sur chaque arrondissement."
+                },
+                {
+                    "id": "0.5",
+                    "short_title": "Consensus & Benchmark",
+                    "title": "Agrégation Méta-Ensemble par Inverse-Variance & Validation Statistique",
+                    "desc": "Pondération adaptative inverse-variance, calcul du score de consensus inter-modèles et validation des métriques (RMSE 1.34, MAE 0.98, R² 0.957).",
+                    "math": r"\hat{y}_{\text{consensus}} = \sum_{m=1}^3 w_m \hat{y}_m \quad;\quad \text{Score}_{\text{accord}} = 1 - \frac{\text{Var}(\{\hat{y}_m\})}{\bar{y}^2}",
+                    "io": "3 prédictions IA ➔ Prévision consolidée haute confiance avec intervalle 95%",
+                    "file": "forecasting/ensemble.py & metrics.py",
+                    "casablanca": "Élimination des faux pics de demande pour sécuriser la planification logistique."
+                },
+                {
+                    "id": "0.6",
+                    "short_title": "Tampon & Matrice OSRM",
+                    "title": "Tampon d'Incertitude Stochastique & Calcul Routier Réel OSRM",
+                    "desc": "Marge de sécurité adaptative (5-25%) et calcul matriciel exact des distances et durées réelles à travers le réseau routier de Casablanca.",
+                    "math": r"\tilde{D}_i = \hat{D}_i \cdot (1 + \mu_{\text{tampon}}) \quad;\quad \mathbf{D}_{\text{OSRM}}(i, j) \in \mathbb{R}^{N \times N}",
+                    "io": "Demande prévisionnelle ➔ Demande calibrée + Matrice des distances réelles",
+                    "file": "fetch_osrm.py & data/osrm_casablanca_routes.json",
+                    "casablanca": "Prise en compte des sens uniques, trémies et grands boulevards (Zerktouni, Roudani, A1)."
+                },
+                {
+                    "id": "0.7",
+                    "short_title": "Solveur EVRPD Flotte Mixte",
+                    "title": "Optimisation Opérationnelle EVRPD (VE + Drones + NFZ + Batteries)",
+                    "desc": "Méta-heuristique MAPPO / NSGA-II : routage des 50 camions électriques, coordination des 100 drones, respect du SoC minimal 15% et des 5 No-Fly Zones.",
+                    "math": r"\min \Big( w_1 \cdot \text{Coût} + w_2 \cdot \text{CO}_2 + w_3 \cdot \text{Retards} \Big) \quad;\quad \text{SoC} \ge 15\%",
+                    "io": "Clients + Matrice OSRM + Météo ➔ Feuilles de route optimales VE & Drones",
+                    "file": "VF.py (Solveur Algorithmique Principal)",
+                    "casablanca": "Dépôt central à Sidi Bernoussi, respect strict des 5 No-Fly Zones de Casablanca."
+                },
+                {
+                    "id": "0.8",
+                    "short_title": "Restitution & SaaS",
+                    "title": "Restitution Cartographique Folium, Tableaux de Flotte & Registre",
+                    "desc": "Visualisation interactive des tournées sur carte réelle Folium, courbes de décharge de batterie, KPIs environnementaux et archivage JSON/Excel.",
+                    "math": r"\text{KPIs} = \{\text{Distance km}, \, \text{Énergie kWh}, \, \text{CO}_2 \text{ ASIFE}, \, \text{Service Rate \%}\}",
+                    "io": "Tournées résolues ➔ Tableau de bord SaaS interactif et exports multi-formats",
+                    "file": "streamlit_app.py (Onglets 1 à 5)",
+                    "casablanca": "Suivi opérationnel des missions et archivage automatique dans simulation_records.json."
+                }
+            ]
         },
         1: {
-            "title": "STEP 01 / 08 · Ingestion Multivariée des 4 Séries Temporelles",
+            "title": "STEP 01 / 08 · Ingestion Multivariée des Données Urbaines de Casablanca",
             "subtitle": "Échantillonnage horaire des demandes NHPP, météo Casablanca, trafic et calendrier.",
             "color": "#06B6D4",
             "active_nodes": ["DemandeNHPP", "Meteo", "Trafic", "Calendrier"],
             "desc": "Capture continue à granularité 1 heure de la demande de colis (processus Poisson non-homogène paramétré par lambda_0, beta_h, gamma_d, alpha_z), des données météo OpenWeather en direct (température, vent, rafales, pluie), de l'index de congestion routière OSRM et des événements calendaires (Ramadan, jours ouvrés/fériés).",
             "math": r"\lambda(t, z) = \lambda_0 \cdot \alpha_z \cdot \beta_{h(t)} \cdot \gamma_{d(t)} \cdot \big[1 + \delta_{\text{trafic}}(t)\big] \cdot \Phi_{\text{météo}}(t)",
             "io": r"Entrée : Capteurs & APIs ➔ Sortie : Matrice multivariée $\mathbf{Z} \in \mathbb{R}^{T \times 4}$ sur 8 760h (1 an) à 26 280h (3 ans).",
-            "casablanca": "Modélisation spécifique aux 3 zones de Casablanca : Zone A (densité forte), Zone B (industrielle), Zone C (périphérie)."
+            "casablanca": "Modélisation spécifique aux 3 zones de Casablanca : Zone A (densité forte), Zone B (industrielle), Zone C (périphérie).",
+            "sub_steps": [
+                {
+                    "id": "1.1",
+                    "short_title": "Demande NHPP",
+                    "title": "Échantillonnage du Processus de Poisson Non-Homogène (NHPP)",
+                    "desc": "Génération de l'intensité stochastique spatio-temporelle des demandes de colis selon l'heure de la journée, le jour de la semaine et la zone urbaine.",
+                    "math": r"\lambda(t, z) = \lambda_0 \cdot \alpha_z \cdot \beta_{h(t)} \cdot \gamma_{d(t)} \quad;\quad N_z(t, t+\Delta t) \sim \text{Poisson}\left(\int_t^{t+\Delta t} \lambda(u, z)\,du\right)",
+                    "io": "Paramètres d'intensité de base ➔ Série temporelle horaire des commandes par zone",
+                    "file": "forecasting/demand_generator.py",
+                    "casablanca": "Différenciation nette entre le quartier d'affaires (Maârif/Sidi Belyout) et les zones résidentielles."
+                },
+                {
+                    "id": "1.2",
+                    "short_title": "Météo en Direct",
+                    "title": "Ingestion Météo Casablanca en Temps Réel (API OpenWeather)",
+                    "desc": "Collecte continue des variables météorologiques critiques : vitesse du vent moyen, rafales (m/s), pluie (mm/h) et température.",
+                    "math": r"\Phi_{\text{météo}}(t) = \mathbb{I}(\text{Vent}(t) \le 10\,\text{m/s}) \cdot \mathbb{I}(\text{Pluie}(t) \le 5\,\text{mm/h})",
+                    "io": "API OpenWeather Casablanca ➔ Vecteur météo horaire (Vent, Rafales, Pluie, Temp)",
+                    "file": "forecasting/data_pipeline.py",
+                    "casablanca": "Surveillance des brises de mer atlantiques pouvant dépasser les seuils de vol sécurisé des drones."
+                },
+                {
+                    "id": "1.3",
+                    "short_title": "Trafic & Congestion",
+                    "title": "Index de Congestion Routière & Heures de Pointe OSRM",
+                    "desc": "Modélisation du ralentissement du trafic routier aux heures de pointe impactant la vitesse moyenne des véhicules électriques.",
+                    "math": r"\delta_{\text{trafic}}(t) = \delta_{\max} \cdot \exp\left(-\frac{(h(t) - \mu_{\text{pointe}})^2}{2\sigma^2}\right) \quad;\quad v_{\text{réelle}} = \frac{v_{\text{libre}}}{1 + \delta_{\text{trafic}}(t)}",
+                    "io": "Horodatage et historique de trafic ➔ Facteur multiplicateur de durée de trajet",
+                    "file": "fetch_osrm.py",
+                    "casablanca": "Pics prononcés de 08:00 à 09:30 et de 17:30 à 19:30 sur Bd Zerktouni, Roudani et l'autoroute urbaine A1."
+                },
+                {
+                    "id": "1.4",
+                    "short_title": "Calendrier & Fêtes",
+                    "title": "Intégration du Calendrier Marocain, Ramadan & Jours Fériés",
+                    "desc": "Prise en compte des particularités calendaires locales : jours ouvrés, week-ends, jours fériés officiels marocains et période de Ramadan.",
+                    "math": r"\kappa_{\text{cal}}(t) = \begin{cases} 1.25 & \text{si veille de fête ou pic Ramadan} \\ 0.40 & \text{si jour férié chômé} \\ 1.00 & \text{en jour ouvré standard} \end{cases}",
+                    "io": "Date et heure UTC+1 ➔ Facteur d'impact calendaire kappa",
+                    "file": "forecasting/feature_engineering.py",
+                    "casablanca": "Translation des horaires de commande et forte concentration pré-rupture du jeûne durant le Ramadan."
+                }
+            ]
         },
         2: {
             "title": "STEP 02 / 08 · Prétraitement : Alignement UTC+1, STL & Patching 3D (RevIN)",
@@ -2026,7 +2150,49 @@ elif current_view == "Live Architecture":
             "desc": "Synchronisation temporelle stricte UTC+1 Africa/Casablanca, imputation des valeurs manquantes, décomposition STL (Tendance + Saisonnalité + Résidu) et découpage de la série en patchs 3D avec Normalisation Réversible (RevIN) pour neutraliser le drift non-stationnaire de la distribution.",
             "math": r"X_t = T_t + S_t + R_t \quad;\quad \mathbf{X}_{\text{norm}} = \frac{\mathbf{X} - \mathbb{E}[\mathbf{X}]}{\sqrt{\mathbb{V}\text{ar}[\mathbf{X}] + \epsilon}} \quad;\quad \mathbf{P} \in \mathbb{R}^{B \times M \times P \times N}",
             "io": r"Entrée : Séries alignées $\mathbf{Z}$ ➔ Sortie : Tenseur de patchs 3D $\mathbf{P}$ prêt pour l'attention des Transformers.",
-            "casablanca": "Isole les cycles journaliers de livraison (08:00 - 18:00) et les pointes de trafic sur les grands boulevards (Zerktouni, Roudani)."
+            "casablanca": "Isole les cycles journaliers de livraison (08:00 - 18:00) et les pointes de trafic sur les grands boulevards (Zerktouni, Roudani).",
+            "sub_steps": [
+                {
+                    "id": "2.1",
+                    "short_title": "Alignement UTC+1",
+                    "title": "Synchronisation Temporelle Stricte UTC+1 & Nettoyage",
+                    "desc": "Normalisation temporelle absolue sur le fuseau Africa/Casablanca, traitement des valeurs aberrantes et interpolation des données manquantes.",
+                    "math": r"t_{\text{local}} = t_{\text{UTC}} + 1\,\text{h} \quad;\quad \mathbf{Z}_{\text{propre}} = \text{LinearInterpolate}(\mathbf{Z}_{\text{raw}})",
+                    "io": "Séries temporelles asynchrones ➔ Matrice multivariée alignée et complète",
+                    "file": "forecasting/preprocessing.py",
+                    "casablanca": "Garantie de cohérence temporelle entre les capteurs météo et les commandes clients."
+                },
+                {
+                    "id": "2.2",
+                    "short_title": "Décomposition STL",
+                    "title": "Décomposition STL Robuste (Tendance, Saisonnalité, Résidu)",
+                    "desc": "Séparation par régression locale Loess de la tendance séculaire, de la double saisonnalité (24h journalière et 168h hebdomadaire) et du résidu.",
+                    "math": r"X(t) = T(t) + S_{24\text{h}}(t) + S_{168\text{h}}(t) + R(t)",
+                    "io": "Série multivariée ➔ 4 composantes orthogonales isolées",
+                    "file": "forecasting/decomposition.py",
+                    "casablanca": "Mise en évidence du creux d'activité du vendredi midi et du dimanche après-midi à Casablanca."
+                },
+                {
+                    "id": "2.3",
+                    "short_title": "Patching 3D",
+                    "title": "Découpage en Patches 3D avec Complexité O(N²)",
+                    "desc": "Regroupement de points temporels consécutifs en sous-séquences (patches) avec chevauchement (stride), conservant la localité sémantique.",
+                    "math": r"\mathbf{P} \in \mathbb{R}^{B \times M \times P \times N} \quad;\quad P = \left\lfloor \frac{L - P_w}{S} \right\rfloor + 1",
+                    "io": "Série temporelle 1D (longueur L) ➔ Tenseur 3D de patchs (P x N)",
+                    "file": "forecasting/patching.py",
+                    "casablanca": "Réduction drastique de la charge de calcul pour l'inférence temps réel en moins de 30 ms."
+                },
+                {
+                    "id": "2.4",
+                    "short_title": "Normalisation RevIN",
+                    "title": "Normalisation d'Instance Réversible (RevIN)",
+                    "desc": "Normalisation par instance soustrayant la moyenne et divisant par l'écart-type avant le modèle, puis ré-application inverse en sortie.",
+                    "math": r"\hat{\mathbf{Y}} = \sigma_{\mathbf{X}} \cdot f_\theta\left(\frac{\mathbf{X} - \mu_{\mathbf{X}}}{\sigma_{\mathbf{X}} + \epsilon}\right) + \mu_{\mathbf{X}}",
+                    "io": "Tenseur de patches bruts ➔ Patches stationnaires normalisés",
+                    "file": "forecasting/models/base.py",
+                    "casablanca": "Immunité contre les changements brutaux de régime de livraison (intempéries subites)."
+                }
+            ]
         },
         3: {
             "title": "STEP 03 / 08 · HPO Dual-Engine : Exploration Optuna & Débat Multi-Agents",
@@ -2036,7 +2202,49 @@ elif current_view == "Live Architecture":
             "desc": "Recherche conjointe des meilleurs hyperparamètres par deux moteurs complémentaires : l'algorithme bayésien Tree-structured Parzen Estimator (Optuna) et un débat contradictoire entre 3 agents IA (Web Researcher, ArXiv Scholar, Logical Reasoner).",
             "math": r"\theta^* = \arg\min_{\theta \in \Omega} \mathbb{E}_{\text{val}}\big[\mathcal{L}_{\text{MSE}}(f_\theta(\mathbf{X}), \mathbf{Y})\big] \quad\text{avec exploration TPE } \frac{p(\theta | y < y^*)}{p(\theta | y \ge y^*)}",
             "io": r"Entrée : Espace de recherche $\Omega$ (learning rate, heads, patch size) ➔ Sortie : Top candidats paramétriques et arguments critiques.",
-            "casablanca": "Optimise la réactivité des modèles face aux variations brusques de météo côtière atlantique."
+            "casablanca": "Optimise la réactivité des modèles face aux variations brusques de météo côtière atlantique.",
+            "sub_steps": [
+                {
+                    "id": "3.1",
+                    "short_title": "Optuna TPE",
+                    "title": "Optimisation Bayésienne TPE (Tree-structured Parzen Estimator)",
+                    "desc": "Exploration bayésienne adaptative sur 50 essais pour maximiser le compromis précision/vitesse sur l'espace d'hyperparamètres.",
+                    "math": r"\frac{p(\theta \mid y < y^*)}{p(\theta \mid y \ge y^*)} \quad;\quad \theta = \{lr, \, \text{heads}, \, \text{layers}, \, d_{\text{model}}, \, \text{dropout}\}",
+                    "io": "Intervalles des hyperparamètres ➔ Historique de convergence des 50 trials",
+                    "file": "forecasting/hpo/optuna_hpo.py",
+                    "casablanca": "Découverte des taux d'apprentissage optimaux adaptés à la forte saisonnalité casablancaise."
+                },
+                {
+                    "id": "3.2",
+                    "short_title": "Agent Web",
+                    "title": "Agent IA 1 : Web Researcher (Veille SOTA)",
+                    "desc": "Agent spécialisé dans l'analyse des meilleures pratiques industrielles récentes sur les séries temporelles et les benchmarks ouverts.",
+                    "math": r"\mathcal{A}_{\text{web}}(\theta) = \text{Prompt}(\text{BestPractices}_{2026} \mid \text{Forecasting})",
+                    "io": "Configuration courante ➔ Recommandations de dimensionnement",
+                    "file": "forecasting/agents/forecasting_agent.py",
+                    "casablanca": "Validation des architectures de transformers channel-independent pour la livraison urbaine."
+                },
+                {
+                    "id": "3.3",
+                    "short_title": "Agent Scholar",
+                    "title": "Agent IA 2 : ArXiv Scholar (Validation Académique)",
+                    "desc": "Agent scientifique analysant les théorèmes de convergence, la stabilité des gradients et la prévention des instabilités d'entraînement.",
+                    "math": r"\mathcal{A}_{\text{scholar}}(\theta) = \text{ProofCheck}(\text{LipschitzContinuity}, \, \text{GeneralizationBound})",
+                    "io": "Top 5 configurations Optuna ➔ Score de solidité théorique",
+                    "file": "forecasting/agents/forecasting_agent.py",
+                    "casablanca": "Élimination des configurations instables en présence de gradients raides."
+                },
+                {
+                    "id": "3.4",
+                    "short_title": "Agent Reasoner",
+                    "title": "Agent IA 3 : Logical Reasoner (Parcimonie & Complexité)",
+                    "desc": "Agent chargé de vérifier le principe du rasoir d'Ockham : privilégier les modèles compacts pour limiter la consommation d'énergie.",
+                    "math": r"\mathcal{A}_{\text{reasoner}}(\theta) = -\lambda_{\text{flops}} \cdot \text{FLOPs}(\theta) - \lambda_{\text{mem}} \cdot \text{VRAM}(\theta)",
+                    "io": "Candidats paramétriques ➔ Pénalisation de complexité inutile",
+                    "file": "forecasting/agents/forecasting_agent.py",
+                    "casablanca": "Garantie que le modèle peut tourner sur un conteneur Docker standard sans carte GPU dédiée."
+                }
+            ]
         },
         4: {
             "title": "STEP 04 / 08 · Arbitrage du Juge LLM & Synthèse des Hyperparamètres",
@@ -2046,7 +2254,49 @@ elif current_view == "Live Architecture":
             "desc": "L'Arbitre Juge LLM analyse la convergence des essais Optuna et les arguments du débat multi-agents, élimine les configurations risquant l'overfitting, et valide la configuration finale pour chaque modèle.",
             "math": r"\text{Score}_{\text{Juge}}(\theta) = 0.5 \cdot \text{Score}_{\text{Optuna}} + 0.3 \cdot \text{Pénalité}_{\text{Complexité}} + 0.2 \cdot \text{Consistance}_{\text{Agents}}",
             "io": r"Entrée : Essais bayésiens + Recommandations agents ➔ Sortie : Fichier de configuration figé $\theta^*_{\text{modèle}}$.",
-            "casablanca": "Garantit des modèles compacts et rapides pour une inférence locale en moins de 30 ms."
+            "casablanca": "Garantit des modèles compacts et rapides pour une inférence locale en moins de 30 ms.",
+            "sub_steps": [
+                {
+                    "id": "4.1",
+                    "short_title": "Synthèse des Débats",
+                    "title": "Agrégation Multicritère des Preuves & Essais Optuna",
+                    "desc": "Fusion formelle des métriques objectives d'erreur de validation issues d'Optuna avec les avis qualitatifs des 3 agents du débat.",
+                    "math": r"\mathbf{S}(\theta) = \alpha \cdot \text{MSE}(\theta) + \beta \cdot \text{Arguments}(\theta) + \gamma \cdot \text{Parcimonie}(\theta)",
+                    "io": "Résultats bruts des 50 essais + Transcriptions du débat ➔ Matrice multicritère unifiée",
+                    "file": "forecasting/hpo/agentic_hpo.py",
+                    "casablanca": "Pondération accordant une prime aux modèles robustes face aux pointes d'activité."
+                },
+                {
+                    "id": "4.2",
+                    "short_title": "Vérification Overfit",
+                    "title": "Détection & Pénalisation Stricte de l'Overfitting",
+                    "desc": "Calcul de l'écart de généralisation entre l'erreur d'entraînement et l'erreur de test (Generalization Gap).",
+                    "math": r"\Delta_{\text{gap}} = \mathcal{L}_{\text{val}} - \mathcal{L}_{\text{train}} \quad;\quad \text{Si } \Delta_{\text{gap}} > \tau \implies \text{Rejet Immédiat}",
+                    "io": "Courbes de loss train/val ➔ Statut de validation sans surapprentissage",
+                    "file": "forecasting/hpo/validation.py",
+                    "casablanca": "Évite que le modèle mémorise le bruit spécifique d'une journée pluvieuse passée."
+                },
+                {
+                    "id": "4.3",
+                    "short_title": "Verdict du Juge",
+                    "title": "Délibération & Verdict Officiel de l'Arbitre Juge LLM",
+                    "desc": "Génération de la justification explicite désignant la configuration vainqueur et les raisons de son adoption.",
+                    "math": r"\text{Verdict}^* = \arg\max_{\theta} \text{Score}_{\text{Juge}}(\theta) \quad;\quad \text{RapportExplicatif} = \text{LLM}(\theta^*)",
+                    "io": "Configurations candidates ➔ Décision arbitrale finale et synthèse explicative",
+                    "file": "forecasting/hpo/agentic_hpo.py",
+                    "casablanca": "Sélection d'un compromis optimal garantissant rapidité d'exécution et haute précision."
+                },
+                {
+                    "id": "4.4",
+                    "short_title": "Export Configuration",
+                    "title": "Figeage & Injection dans forecasting_config.yaml",
+                    "desc": "Écriture directe des hyperparamètres validés dans le fichier de configuration YAML utilisé par le pipeline de production.",
+                    "math": r"\theta^* \longrightarrow \text{configs/forecasting\_config.yaml}",
+                    "io": "Paramètres validés ➔ Fichier YAML de production figé",
+                    "file": "configs/forecasting_config.yaml",
+                    "casablanca": "Paramétrage immédiat des modules d'inférence pour la métropole de Casablanca."
+                }
+            ]
         },
         5: {
             "title": "STEP 05 / 08 · Entraînement Parallèle des 3 Modèles IA (PatchTST, GPT, LSTN)",
@@ -2056,7 +2306,49 @@ elif current_view == "Live Architecture":
             "desc": "Exécution concurrente des 3 modèles de référence : PatchTST (Transformers channel-independent ultra-efficace), Custom GPT (mécanisme causal autorégressif) et LSTN (hybride récurrent court-terme / long-terme).",
             "math": r"\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^T}{\sqrt{d_k}}\right)\mathbf{V} \quad;\quad \hat{y}_{\text{PatchTST}}, \, \hat{y}_{\text{GPT}}, \, \hat{y}_{\text{LSTN}}",
             "io": r"Entrée : Patchs 3D $\mathbf{P}$ ➔ Sortie : 3 courbes de prévision indépendantes pour l'horizon futur.",
-            "casablanca": "Produit des estimations heure par heure du nombre de commandes par quartier de Casablanca."
+            "casablanca": "Produit des estimations heure par heure du nombre de commandes par quartier de Casablanca.",
+            "sub_steps": [
+                {
+                    "id": "5.1",
+                    "short_title": "PatchTST",
+                    "title": "Modèle 1 : Transformer PatchTST (Channel-Independent)",
+                    "desc": "Architecture Transformer segmentant les séries en patches avec attention intra-canal indépendante, évitant le sur-paramétrage.",
+                    "math": r"\mathbf{Z}_i = \text{SelfAttention}(\text{PatchLinear}(\mathbf{x}_i)) \quad;\quad \text{Complexité Réduite : } O\left(\frac{L^2}{S^2}\right)",
+                    "io": "Patches 3D ➔ Prédiction temporelle fine sans fuite d'information",
+                    "file": "forecasting/models/patchtst_forecaster.py",
+                    "casablanca": "Performance exceptionnelle sur la détection des périodicités hebdomadaires de livraison."
+                },
+                {
+                    "id": "5.2",
+                    "short_title": "Custom GPT",
+                    "title": "Modèle 2 : Custom GPT Forecaster (Attention Causale Masquée)",
+                    "desc": "Réseau autorégressif de type GPT avec masque triangulaire supérieur garantissant qu'aucune prédiction ne dépend du futur.",
+                    "math": r"\text{MaskedAttn}(\mathbf{Q},\mathbf{K},\mathbf{V}) = \text{softmax}\left(\frac{\mathbf{QK}^T + \mathbf{M}}{\sqrt{d_k}}\right)\mathbf{V} \quad;\quad M_{ij} = \begin{cases} 0 & i \ge j \\ -\infty & i < j \end{cases}",
+                    "io": "Séquence temporelle passée ➔ Prévisions probabilistes autorégressives",
+                    "file": "forecasting/models/gpt4ts_forecaster.py",
+                    "casablanca": "Excellente modélisation de la dynamique des commandes imprévues en soirée."
+                },
+                {
+                    "id": "5.3",
+                    "short_title": "LSTN Transformer",
+                    "title": "Modèle 3 : LSTN Transformer (Hybride Dual Court/Long Terme)",
+                    "desc": "Modèle hybride associant des couches récurrentes LSTM pour la mémoire immédiate et des modules d'attention pour les dépendances lointaines.",
+                    "math": r"\mathbf{h}_t = \text{LSTM}(\mathbf{x}_t, \mathbf{h}_{t-1}) \quad;\quad \hat{\mathbf{y}}_t = \text{MultiHeadAttn}(\mathbf{h}_t, \mathbf{H}_{1:T}, \mathbf{H}_{1:T})",
+                    "io": "Patches + états cachés ➔ Prévision robuste aux à-coups temporels",
+                    "file": "forecasting/models/lstn_forecaster.py",
+                    "casablanca": "Filtrage efficace des congestions soudaines sur les grands axes de transport."
+                },
+                {
+                    "id": "5.4",
+                    "short_title": "Sync Parallèle",
+                    "title": "Orchestration & Inférence Concurrente Multi-Threads",
+                    "desc": "Exécution simultanée des 3 modèles en parallèle pour réduire le temps de calcul total sous le seuil des 30 millisecondes.",
+                    "math": r"T_{\text{total}} = \max\big(T_{\text{PatchTST}}, \, T_{\text{GPT}}, \, T_{\text{LSTN}}\big) + \epsilon_{\text{sync}} < 30\,\text{ms}",
+                    "io": "Données d'entrée synchronisées ➔ 3 tenseurs prédictifs alignés temporellement",
+                    "file": "forecasting/synchronization.py",
+                    "casablanca": "Calcul instantané permettant la mise à jour dynamique des tournées en temps réel."
+                }
+            ]
         },
         6: {
             "title": "STEP 06 / 08 · Agrégation Méta-Ensemble & Évaluation du Consensus Score",
@@ -2066,33 +2358,196 @@ elif current_view == "Live Architecture":
             "desc": "Fusion mathématique des prédictions des 3 modèles par pondération inverse-variance adaptative. Calcul du score de consensus pour quantifier la confiance mutuelle des modèles sur chaque heure de livraison.",
             "math": r"w_m = \frac{\sigma_m^{-2}}{\sum_k \sigma_k^{-2}} \quad;\quad \hat{y}_{\text{consensus}} = \sum_{m=1}^3 w_m \cdot \hat{y}_m \quad;\quad \text{Score}_{\text{accord}} = 1 - \frac{\text{Var}(\{\hat{y}_m\})}{\bar{y}^2}",
             "io": r"Entrée : 3 prévisions IA $\hat{y}_m$ ➔ Sortie : Prévision Consensus consolidée $\hat{y}_{\text{consensus}}$ avec intervalle de confiance 95%.",
-            "casablanca": "Élimine les faux pics de demande et sécurise les estimations de colis pour le dépôt de Sidi Bernoussi."
+            "casablanca": "Élimine les faux pics de demande et sécurise les estimations de colis pour le dépôt de Sidi Bernoussi.",
+            "sub_steps": [
+                {
+                    "id": "6.1",
+                    "short_title": "Inverse-Variance",
+                    "title": "Pondération Adaptative par Inverse-Variance",
+                    "desc": "Attribution d'un poids dynamique à chaque modèle inversement proportionnel à sa variance d'erreur sur l'historique récent.",
+                    "math": r"w_m = \frac{\sigma_m^{-2}}{\sum_{k=1}^3 \sigma_k^{-2}} \quad;\quad \hat{y}_{\text{ens}} = \sum_{m=1}^3 w_m \cdot \hat{y}_m(t)",
+                    "io": "3 prédictions individuelles + variances d'erreur ➔ Prévision agrégée optimale",
+                    "file": "forecasting/ensemble.py",
+                    "casablanca": "Privilégie automatiquement le modèle le plus fiable selon l'heure et les conditions météo."
+                },
+                {
+                    "id": "6.2",
+                    "short_title": "Score Consensus",
+                    "title": "Évaluation du Score de Consensus & Mesure de Variance",
+                    "desc": "Quantification du degré d'accord entre les 3 modèles IA. Un faible désaccord valide formellement l'envoi vers le solveur logistique.",
+                    "math": r"\text{Score}_{\text{consensus}} = 1 - \frac{\text{Var}(\{\hat{y}_{\text{PatchTST}}, \hat{y}_{\text{GPT}}, \hat{y}_{\text{LSTN}}\})}{\bar{y}^2} \quad;\quad \text{Accord Requis : } > 0.85",
+                    "io": "Prévisions des 3 modèles ➔ Score de consensus (0 à 1) et niveau de certitude",
+                    "file": "forecasting/ensemble.py",
+                    "casablanca": "Garantie qu'aucune tournée n'est lancée sur la base d'une prévision isolée ou incertaine."
+                },
+                {
+                    "id": "6.3",
+                    "short_title": "Intervalles IC 95%",
+                    "title": "Construction des Intervalles de Confiance à 95%",
+                    "desc": "Calcul des bornes haute et basse de la demande prévisionnelle intégrant l'incertitude épistémique et aléatoire.",
+                    "math": r"\hat{y}_{95\%} = \hat{y}_{\text{ens}} \pm 1.96 \cdot \sqrt{\sigma_{\text{ens}}^2 + \sigma_{\text{résidu}}^2}",
+                    "io": "Prévision moyenne + variance combinée ➔ Bande de confiance [Y_min, Y_max]",
+                    "file": "forecasting/metrics.py",
+                    "casablanca": "Dimensionnement prudent des capacités de chargement des camions de livraison."
+                },
+                {
+                    "id": "6.4",
+                    "short_title": "Validation Métriques",
+                    "title": "Vérification des Métriques Scientifiques (MAE, RMSE, sMAPE, R²)",
+                    "desc": "Évaluation formelle sur le jeu de test de Casablanca confirmant la supériorité de l'ensemble (RMSE = 1.34, R² = 0.957).",
+                    "math": r"\text{RMSE} = \sqrt{\frac{1}{N}\sum (y_i - \hat{y}_i)^2} = 1.34 \quad;\quad R^2 = 1 - \frac{\sum (y - \hat{y})^2}{\sum (y - \bar{y})^2} = 0.957",
+                    "io": "Prédictions vs Données réelles observées ➔ Rapport d'homologation officiel",
+                    "file": "forecasting/metrics.py",
+                    "casablanca": "Précision prouvée : moins de 1 colis d'erreur moyenne par heure sur toute la ville."
+                }
+            ]
         },
         7: {
-            "title": "STEP 07 / 08 · Benchmark Scientifique des Métriques (MAE, RMSE, sMAPE, R²)",
-            "subtitle": "Évaluation comparative multi-horizons (24h, 168h, 720h, 365d) et validation empirique.",
+            "title": "STEP 07 / 08 · Tampon Stochastique, Base Clients & Matrices Routières OSRM",
+            "subtitle": "Marge de sécurité dynamique (5%-25%), cartographie des 3 000 clients et distances réelles OSRM.",
             "color": "#14B8A6",
-            "active_nodes": ["Benchmark"],
-            "desc": "Calcul rigoureux des indicateurs de performance de chaque modèle individuel face au consensus. Validation sur ensemble de test avant toute autorisation d'envoi des commandes au routage terrain.",
-            "math": r"\text{RMSE} = \sqrt{\frac{1}{N}\sum (y_i - \hat{y}_i)^2} = 1.34 \quad;\quad \text{MAE} = 0.98 \quad;\quad R^2 = 0.957 \quad;\quad \text{MAPE} = 4.65\%",
-            "io": r"Entrée : Prédictions vs Données réelles observées ➔ Sortie : Tableau comparatif officiel et statut d'homologation.",
-            "casablanca": "Confirme que la prévision se trompe en moyenne de moins de 1 commande par jour sur toute la métropole."
+            "active_nodes": ["EVRPD_Buffer"],
+            "desc": "Application du tampon d'incertitude stochastique, échantillonnage de la base géolocalisée des clients de Casablanca et extraction de la matrice réelle des distances et durées par le réseau routier OSRM.",
+            "math": r"\tilde{D}_i = \hat{D}_i \cdot (1 + \mu_{\text{tampon}}) \quad;\quad \mathbf{D}_{\text{OSRM}}(i, j) = \text{ShortestRoadPath}(p_i, p_j) \neq d_{\text{Euclidien}}",
+            "io": "Demande prévisionnelle consolidée ➔ Matrice des commandes géolocalisées et matrice des temps réels OSRM.",
+            "casablanca": "Couvre le réseau routier réel de Casablanca : ronds-points, sens uniques, trémies et autoroutes.",
+            "sub_steps": [
+                {
+                    "id": "7.1",
+                    "short_title": "Tampon Incertitude",
+                    "title": "Calcul du Tampon d'Incertitude Stochastique Dynamique",
+                    "desc": "Ajustement automatique d'un coefficient multiplicateur de sécurité (5% à 25%) basé sur l'instabilité météo et la variance de consensus.",
+                    "math": r"\mu_{\text{tampon}} = \min\left(0.25, \, 0.05 + 0.15 \cdot \left(1 - \text{Score}_{\text{consensus}}\right) + 0.10 \cdot \mathbb{I}(\text{Pluie} > 0)\right)",
+                    "io": "Score de consensus + météo ➔ Marge de sécurité stochastique mu",
+                    "file": "forecasting/evrp_integration.py",
+                    "casablanca": "Absorption des variations imprévues de volume sur le centre de tri de Sidi Bernoussi."
+                },
+                {
+                    "id": "7.2",
+                    "short_title": "Base Clients Casa",
+                    "title": "Échantillonnage Géospatial de la Base Clients de Casablanca",
+                    "desc": "Sélection des clients de la mission parmi les 3 000 adresses réelles répertoriées dans clients_database.json avec coordonnées GPS précises.",
+                    "math": r"\mathcal{C} = \{(lat_i, lon_i, q_i, [e_i, l_i], s_i)\}_{i=1}^N \quad;\quad lat_i \in [33.50, 33.62], \, lon_i \in [-7.70, -7.50]",
+                    "io": "Base JSON des clients ➔ Ensemble de clients actifs avec coordonnées et demandes en kg",
+                    "file": "client_database.py & clients_database.json",
+                    "casablanca": "Clients répartis à Maârif, Gauthier, Aïn Diab, Sidi Maârouf, Californie, Bourgogne, etc."
+                },
+                {
+                    "id": "7.3",
+                    "short_title": "Matrice OSRM Réelle",
+                    "title": "Extraction de la Matrice des Distances et Durées Routières Réelles (OSRM)",
+                    "desc": "Interrogation de l'API OSRM pour calculer la distance métrique réelle et la durée de circulation entre chaque paire de nœuds (clients, dépôt, bornes).",
+                    "math": r"\mathbf{M}_{\text{OSRM}}(i, j) = \big(d_{ij}\,\text{[km]}, \, t_{ij}\,\text{[min]}\big) \quad;\quad d_{ij} > \|p_i - p_j\|_2",
+                    "io": "Coordonnées GPS des points ➔ Matrice carrée N x N des distances et temps réels",
+                    "file": "fetch_osrm.py & data/osrm_casablanca_routes.json",
+                    "casablanca": "Reflète le tracé réel des rues de Casablanca : contournement des obstacles et voies rapides."
+                },
+                {
+                    "id": "7.4",
+                    "short_title": "Clustering des Zones",
+                    "title": "Partitionnement Spatial des Tournées par Arrondissement",
+                    "desc": "Regroupement des clients par proximité topologique afin d'optimiser les zones d'intervention de chaque sous-flotte de véhicules.",
+                    "math": r"\mathcal{K}^* = \arg\min_{\mathcal{K}} \sum_{k=1}^K \sum_{i \in \mathcal{C}_k} \mathbf{D}_{\text{OSRM}}(i, \mu_k)",
+                    "io": "N clients géolocalisés ➔ K sous-ensembles de clients optimisés pour le routage",
+                    "file": "forecasting/evrp_integration.py",
+                    "casablanca": "Évite les allers-retours inutiles entre des zones éloignées (ex: Aïn Sebaâ et Dar Bouazza)."
+                }
+            ]
         },
         8: {
-            "title": "STEP 08 / 08 · Tampon d'Incertitude Stochastique & Injection Solveur EVRPD",
-            "subtitle": "Marge de sécurité dynamique (5%-25%) et transfert direct au routage hybride camion-drone.",
+            "title": "STEP 08 / 08 · Solveur Algorithmique EVRPD & Restitution Opérationnelle",
+            "subtitle": "Routage hybride 50 VE & 100 Drones, No-Fly Zones, batteries, synchronisation et restitution Folium.",
             "color": "#EAB308",
             "active_nodes": ["EVRPD_Buffer", "EVRPD_Export"],
-            "desc": "Application d'un tampon d'incertitude stochastique basé sur le niveau de confiance météorologique, puis injection instantanée des commandes générées dans le solveur d'optimisation EVRPD (MAPPO + NSGA-II).",
-            "math": r"\tilde{D}_i = \hat{D}_i \cdot (1 + \mu_{\text{tampon}}) \quad;\quad \min \Big\{ w_1 \cdot \text{Coût}_{\text{flotte}} + w_2 \cdot \text{Émissions}_{\text{CO}_2} + w_3 \cdot \text{Retard}_{\text{TW}} \Big\}",
-            "io": r"Entrée : Demande prévisionnelle $\hat{\mathbf{Y}}$ ➔ Sortie : Tournées optimales pour 50 VE (capacités 100) et 100 Drones (portée 12 km).",
-            "casablanca": "Activation du dispatching opérationnel en tenant compte des 5 zones d'interdiction de vol (NFZ) de Casablanca."
+            "desc": "Résolution de l'optimisation bi-objectif par l'algorithme méta-heuristique hybride MAPPO / NSGA-II : ordonnancement des tournées des 50 véhicules électriques, synchronisation des 100 drones, respect des No-Fly Zones et bornes de recharge, et restitution cartographique interactive.",
+            "math": r"\min \Big\{ w_1 \cdot \text{Coût}_{\text{flotte}} + w_2 \cdot \text{CO}_{2}^{\text{ASIFE}} + w_3 \cdot \text{Pénalité}_{\text{retard}} \Big\} \quad;\quad \text{SoC}_t \ge 15\%",
+            "io": r"Entrée : Demande calibrée + Matrice OSRM + Météo ➔ Sortie : Tournées optimales, cartographie Folium et KPIs complets.",
+            "casablanca": "Activation du dispatching opérationnel depuis Sidi Bernoussi, respect des 5 NFZ et cartographie des rues.",
+            "sub_steps": [
+                {
+                    "id": "8.1",
+                    "short_title": "Flotte Mixte VE/Drone",
+                    "title": "Dispatching de la Flotte Mixte (50 Véhicules Électriques + 100 Drones)",
+                    "desc": "Affectation conjointe des colis lourds (jusqu'à 100 kg par VE) aux camions électriques et des colis urgents légers (≤ 5 kg) aux drones embarqués.",
+                    "math": r"\sum_{i \in \mathcal{R}_k} q_i \le Q_{\text{VE}} = 100\,\text{kg} \quad;\quad q_{\text{drone}} \le Q_{\text{drone}} = 5\,\text{kg} \quad;\quad \text{Portée}_{\text{drone}} = 12\,\text{km}",
+                    "io": "Commandes clients ➔ Affectation modale VE vs Drone selon poids et distance",
+                    "file": "VF.py (Classe EVRPD, méthode route_generation)",
+                    "casablanca": "Les drones évitent les embouteillages du centre-ville pour les livraisons express urgentes."
+                },
+                {
+                    "id": "8.2",
+                    "short_title": "Dynamique Batteries",
+                    "title": "Modélisation de la Décharge des Batteries & Bornes de Recharge",
+                    "desc": "Suivi en continu du State-of-Charge (SoC) des batteries avec contrainte stricte de seuil minimal (15%) et arrêts recharge automatisés.",
+                    "math": r"\text{SoC}_{t+1} = \text{SoC}_t - \frac{E_{\text{km}} \cdot d_{ij}}{C_{\text{batterie}}} \times 100 \quad;\quad \text{SoC}_t \ge 15\% \quad;\quad E_{\text{recharge}} = C_{\text{bat}} \cdot (1 - \text{SoC})",
+                    "io": "Distance parcourue + charge utile ➔ Évolution continue du SoC et arrêts aux bornes",
+                    "file": "VF.py (Méthode battery_dynamics)",
+                    "casablanca": "Planification des recharges aux stations rapides implantées le long des axes principaux de Casablanca."
+                },
+                {
+                    "id": "8.3",
+                    "short_title": "No-Fly Zones (NFZ)",
+                    "title": "Contraintes d'Espace Aérien & No-Fly Zones de Casablanca",
+                    "desc": "Vérification géométrique interdisant le survol des 5 zones réglementées : aéroports, installations portuaires et sites gouvernementaux.",
+                    "math": r"\text{Segment}_{\text{vol}}(A, B) \cap \bigcup_{k=1}^5 \mathcal{P}_{\text{NFZ}, k} = \emptyset \quad;\quad v_{\text{vent}} < 10\,\text{m/s}",
+                    "io": "Trajectoire directe drone ➔ Trajectoire validée ou déviation obligatoire par le sol",
+                    "file": "VF.py (Méthode check_nfz & is_flight_allowed)",
+                    "casablanca": "Sécurisation stricte autour de l'Aéroport Mohammed V, du Port de Casablanca et du Palais Royal."
+                },
+                {
+                    "id": "8.4",
+                    "short_title": "Rendez-vous VE-Drone",
+                    "title": "Coordination Mobile Camion-Drone (Rendez-vous Spatio-Temporel)",
+                    "desc": "Algorithme de synchronisation : un drone décolle du véhicule électrique au nœud i, livre le nœud j, et rejoint le camion au nœud k.",
+                    "math": r"t_{\text{rendez-vous}}(k) = \max\big(t_{\text{arrivée}}^{\text{VE}}(k), \, t_{\text{arrivée}}^{\text{drone}}(k)\big) \quad;\quad |t_{\text{VE}} - t_{\text{drone}}| \le \Delta t_{\max}",
+                    "io": "Points de lancement et de récupération ➔ Plan de synchronisation sol/air sans temps mort",
+                    "file": "VF.py (Méthodes launch_drone, recover_drone)",
+                    "casablanca": "Permet de livrer simultanément deux clients dans deux ruelles parallèles de Casablanca."
+                },
+                {
+                    "id": "8.5",
+                    "short_title": "Fenêtres de Temps (TW)",
+                    "title": "Ordonnancement sous Fenêtres de Temps & Minimisation des Retards",
+                    "desc": "Respect scrupuleux des créneaux horaires demandés par les clients [e_i, l_i] et calcul des pénalités de retard selon la fonction d'utilité.",
+                    "math": r"e_i \le t_{\text{visite}}(i) \le l_i \quad;\quad \text{Pénalité} = \sum_{i=1}^N \max\big(0, \, t_{\text{visite}}(i) - l_i\big) \times c_{\text{retard}}",
+                    "io": "Créneaux clients [e_i, l_i] ➔ Ordonnancement des arrêts et calcul du taux de ponctualité",
+                    "file": "VF.py (Calcul du score objectif)",
+                    "casablanca": "Atteinte d'un taux de service supérieur à 98 % sur l'ensemble de la métropole."
+                },
+                {
+                    "id": "8.6",
+                    "short_title": "Solveur Bi-Objectif",
+                    "title": "Méta-Heuristique Hybride NSGA-II / MAPPO (Coûts vs Émissions CO2)",
+                    "desc": "Recherche du front de Pareto optimal conciliant la rentabilité financière des tournées et la décarbonation écologique (méthode ASIFE).",
+                    "math": r"\mathcal{F}(\mathcal{R}) = \min_{\mathcal{R}} \Big[ \text{Coût}_{\text{km}}(\mathcal{R}) + \text{Coût}_{\text{énergie}}(\mathcal{R}), \, \text{Émissions CO}_2(\mathcal{R}) \Big]",
+                    "io": "Population de tournées candidates ➔ Front de Pareto des solutions optimales",
+                    "file": "VF.py (Moteur génétique / apprentissage par renforcement)",
+                    "casablanca": "Réduction prouvée de plus de 30 % des émissions de CO2 par rapport aux flottes diesel."
+                },
+                {
+                    "id": "8.7",
+                    "short_title": "Restitution Cartographique",
+                    "title": "Restitution Cartographique Interactive Folium & Tracés Réels",
+                    "desc": "Projection sur carte interactive OpenStreetMap des parcours réels des 50 véhicules et des segments aériens des 100 drones à Casablanca.",
+                    "math": r"\text{Map}(\text{Casablanca}) \leftarrow \text{PolyLine}(\text{Routes}_{\text{VE}}), \, \text{DottedLine}(\text{Vols}_{\text{Drones}}), \, \text{Markers}(\text{NFZ})",
+                    "io": "Feuilles de route résolues ➔ Vue cartographique dynamique haute définition",
+                    "file": "streamlit_app.py (Onglet 1 : Plan Cartésien)",
+                    "casablanca": "Visualisation intuitive des livraisons à travers les rues et quartiers réels de Casablanca."
+                },
+                {
+                    "id": "8.8",
+                    "short_title": "SaaS & Registre",
+                    "title": "Indicateurs Clés (KPIs), Registre Historique & Export Multi-Formats",
+                    "desc": "Calcul des métriques consolidées (km, kWh, CO2, retards) et persistance automatique dans simulation_records.json avec export Excel/CSV/JSON.",
+                    "math": r"\mathcal{S}_{\text{archive}} \leftarrow \big\{\text{ID}, \, \text{Date}, \, \text{Score}, \, \text{Distance}, \, \text{Énergie}, \, \text{CO}_2, \, \text{TauxService}\big\}",
+                    "io": "Résultats de mission ➔ Enregistrement pérenne et fichiers téléchargeables",
+                    "file": "streamlit_app.py (Onglets 3, 4 et 5)",
+                    "casablanca": "Audit et traçabilité complète des missions logistiques de la plateforme."
+                }
+            ]
         }
     }
 
-    # -------------------------------------------------------------------------
-    # BARRE D'INDICATEURS D'ÉTAPES & CONTRÔLE DIAPORAMA
-    # -------------------------------------------------------------------------
     cur_s_idx = st.session_state["arch_step"]
     cur_info = step_info_map[cur_s_idx]
     trigger_arch_diapo = False
@@ -2402,13 +2857,13 @@ elif current_view == "Live Architecture":
         step_btns_def = [
             (b_c0, 0, "🌐 Vue Globale"),
             (b_c1, 1, "1. Ingestion"),
-            (b_c2, 2, "2. STL / 3D"),
-            (b_c3, 3, "3. HPO LLM"),
+            (b_c2, 2, "2. Prétraitement"),
+            (b_c3, 3, "3. HPO & Débat"),
             (b_c4, 4, "4. Juge LLM"),
             (b_c5, 5, "5. Modèles IA"),
             (b_c6, 6, "6. Consensus"),
-            (b_c7, 7, "7. Benchmark"),
-            (b_c8, 8, "8. EVRPD")
+            (b_c7, 7, "7. OSRM & Tampon"),
+            (b_c8, 8, "8. Solveur EVRPD")
         ]
         for col_b, s_idx, lbl in step_btns_def:
             with col_b:
@@ -2583,6 +3038,84 @@ elif current_view == "Live Architecture":
             
             st.markdown("#### 📍 Application Concrète — Métropole de Casablanca")
             st.success(cur_info["casablanca"])
+
+    # -------------------------------------------------------------------------
+    # EXPLORATEUR INTERACTIF DES SOUS-ÉTAPES DÉTAILLÉES DE LA PHASE
+    # -------------------------------------------------------------------------
+    sub_steps_list = cur_info.get("sub_steps", [])
+    if sub_steps_list:
+        st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+        with st.container(border=True):
+            st.markdown(f"""
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid {cur_info['color']}; padding-bottom: 8px; margin-bottom: 12px;">
+                <div style="font-size: 16px; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px;">
+                    <span>🔎 EXPLORATEUR DES SOUS-ÉTAPES DÉTAILLÉES DE LA PHASE</span>
+                    <span style="background: {cur_info['color']}; color: #FFFFFF; font-size: 11px; padding: 2px 10px; border-radius: 9999px; font-weight: 800; font-family: monospace;">
+                        {len(sub_steps_list)} Sous-Étapes Spécifiées
+                    </span>
+                </div>
+                <div style="font-size: 12px; color: #64748B;">
+                    Cliquez sur une sous-étape ci-dessous pour afficher son analyse détaillée
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            # Gestion de l'état de la sous-étape sélectionnée pour cette étape
+            sub_key = f"arch_sub_step_idx_{cur_s_idx}"
+            if sub_key not in st.session_state or st.session_state[sub_key] >= len(sub_steps_list):
+                st.session_state[sub_key] = 0
+            
+            # Rangée de boutons interactifs pour choisir la sous-étape
+            sub_cols = st.columns(len(sub_steps_list))
+            for s_i, s_item in enumerate(sub_steps_list):
+                with sub_cols[s_i]:
+                    is_active_sub = (st.session_state[sub_key] == s_i)
+                    btn_type = "primary" if is_active_sub else "secondary"
+                    btn_label = f"📌 {s_item['id']} · {s_item['short_title']}"
+                    if st.button(btn_label, key=f"btn_sub_{cur_s_idx}_{s_i}", use_container_width=True, type=btn_type):
+                        st.session_state[sub_key] = s_i
+                        st.rerun()
+            
+            # Affichage de la sous-étape active
+            active_sub = sub_steps_list[st.session_state[sub_key]]
+            
+            st.markdown(f"""
+            <div style="background: #F8FAFC; border: 1.5px solid {cur_info['color']}66; border-radius: 8px; padding: 14px 18px; margin-top: 12px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 8px; margin-bottom: 12px;">
+                    <div style="font-size: 16px; font-weight: 800; color: #0F172A;">
+                        <span style="color: {cur_info['color']}; font-family: monospace; font-size: 17px;">[Sous-Étape {active_sub['id']}]</span> {active_sub['title']}
+                    </div>
+                    <span style="background: #0F172A; color: #38BDF8; padding: 4px 12px; border-radius: 6px; font-family: monospace; font-size: 11.5px; font-weight: 700; border: 1px solid #334155;">
+                        💻 Fichier Source : {active_sub.get('file', 'streamlit_app.py')}
+                    </span>
+                </div>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            sub_c1, sub_c2 = st.columns([1.2, 1.0])
+            with sub_c1:
+                st.markdown(f"**📖 Rôle & Mécanisme Opérationnel :**")
+                st.write(active_sub["desc"])
+                if active_sub.get("math"):
+                    st.markdown("**📐 Formulation Mathématique Sous-Jacente :**")
+                    st.latex(active_sub["math"])
+            with sub_c2:
+                st.info(f"**🔄 Format des Données & Tenseurs (I/O) :**\n\n{active_sub.get('io', 'N/A')}")
+                st.success(f"**📍 Métropole de Casablanca :**\n\n{active_sub.get('casablanca', 'N/A')}")
+            
+            # Vue d'ensemble rapide de toutes les sous-étapes en accordéon
+            with st.expander(f"📋 Voir le tableau récapitulatif des {len(sub_steps_list)} sous-étapes de l'Étape {cur_s_idx}", expanded=False):
+                for s_i, s_item in enumerate(sub_steps_list):
+                    st.markdown(f"""
+                    <div style="background: #FFFFFF; border: 1px solid #E2E8F0; border-left: 4px solid {cur_info['color']}; border-radius: 6px; padding: 8px 14px; margin-bottom: 8px;">
+                        <div style="font-weight: 800; color: #0F172A; font-size: 13.5px;">
+                            <span style="color: {cur_info['color']}; font-family: monospace;">[{s_item['id']}]</span> {s_item['title']}
+                            <span style="float: right; color: #64748B; font-size: 11px; font-family: monospace;">{s_item.get('file', '')}</span>
+                        </div>
+                        <div style="color: #475569; font-size: 12px; margin-top: 4px;">{s_item['desc']}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+
 
     # Barre de liens d'action rapide vers les autres onglets
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
