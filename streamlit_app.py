@@ -1972,21 +1972,39 @@ elif current_view == "Live Architecture":
     </div>
     """, unsafe_allow_html=True)
 
+    is_en = (st.session_state.get("app_language", "FR") == "EN")
+
     # -------------------------------------------------------------------------
     # GESTION DE L'ÉTAPE ACTIVE DU PIPELINE & SYNCHRONISATION LIVE SYSTÈME
     # -------------------------------------------------------------------------
     if "pipeline_system_step" not in st.session_state:
         if st.session_state.get("has_forecast", False):
             st.session_state["pipeline_system_step"] = 7
-            st.session_state["pipeline_system_status"] = "Modèles IA & Benchmark Validés"
+            st.session_state["pipeline_system_status"] = "AI Models & Benchmark Validated" if is_en else "Modèles IA & Benchmark Validés"
         else:
             st.session_state["pipeline_system_step"] = 0
-            st.session_state["pipeline_system_status"] = "Pipeline prêt en attente d'exécution"
+            st.session_state["pipeline_system_status"] = "Pipeline ready, waiting for execution" if is_en else "Pipeline prêt en attente d'exécution"
         st.session_state["pipeline_system_timestamp"] = datetime.now().strftime("%H:%M:%S")
 
     sys_step = st.session_state.get("pipeline_system_step", 0)
-    sys_status = st.session_state.get("pipeline_system_status", "Prêt")
+    sys_status = st.session_state.get("pipeline_system_status", "Ready" if is_en else "Prêt")
     sys_time = st.session_state.get("pipeline_system_timestamp", "")
+
+    # Mappage bilingue du statut en cas de changement de langue à chaud
+    status_trans_map = {
+        "Modèles IA & Benchmark Validés": ("Modèles IA & Benchmark Validés", "AI Models & Benchmark Validated"),
+        "AI Models & Benchmark Validated": ("Modèles IA & Benchmark Validés", "AI Models & Benchmark Validated"),
+        "Pipeline prêt en attente d'exécution": ("Pipeline prêt en attente d'exécution", "Pipeline ready, waiting for execution"),
+        "Pipeline ready, waiting for execution": ("Pipeline prêt en attente d'exécution", "Pipeline ready, waiting for execution"),
+        "Prêt": ("Prêt", "Ready"),
+        "Ready": ("Prêt", "Ready"),
+        "Simulation complète exécutée avec succès (de l'Ingestion au Solveur EVRPD)": ("Simulation complète exécutée avec succès (de l'Ingestion au Solveur EVRPD)", "Full simulation executed successfully (from Ingestion to EVRPD Solver)"),
+        "Full simulation executed successfully (from Ingestion to EVRPD Solver)": ("Simulation complète exécutée avec succès (de l'Ingestion au Solveur EVRPD)", "Full simulation executed successfully (from Ingestion to EVRPD Solver)"),
+        "Système réinitialisé en mode veille (IDLE)": ("Système réinitialisé en mode veille (IDLE)", "System reset to standby mode (IDLE)"),
+        "System reset to standby mode (IDLE)": ("Système réinitialisé en mode veille (IDLE)", "System reset to standby mode (IDLE)")
+    }
+    if sys_status in status_trans_map:
+        sys_status = status_trans_map[sys_status][1 if is_en else 0]
 
     # Détection automatique : Si le système a progressé depuis la dernière visite de l'architecture,
     # caler automatiquement l'affichage sur l'étape réelle du système !
@@ -1997,7 +2015,7 @@ elif current_view == "Live Architecture":
         st.session_state["arch_step"] = sys_step
         st.session_state["last_seen_sys_step"] = sys_step
 
-    step_info_map = {
+    step_info_map_fr = {
         0: {
             "title": "🌐 Vue d'Ensemble Complète du Pipeline (18 Nœuds · 20 Flux)",
             "subtitle": "Workflow intégral de bout en bout : de l'ingestion multivariée jusqu'au routage opérationnel camion-drone.",
@@ -2090,65 +2108,194 @@ elif current_view == "Live Architecture":
         }
     }
 
-    # -------------------------------------------------------------------------
-    # BARRE D'INDICATEURS D'ÉTAPES & CONTRÔLE DIAPORAMA
-    # -------------------------------------------------------------------------
-    cur_s_idx = st.session_state["arch_step"]
-    cur_info = step_info_map[cur_s_idx]
-    trigger_arch_diapo = False
+    step_info_map_en = {
+        0: {
+            "title": "🌐 Complete Pipeline Overview (18 Nodes · 20 Flows)",
+            "subtitle": "End-to-end operational workflow: from multivariate ingestion to hybrid truck-drone dispatching.",
+            "color": "#38BDF8",
+            "active_nodes": ["DemandeNHPP", "Meteo", "Trafic", "Calendrier", "Sync", "STL", "Patching", "HPO_Optuna", "Agentic_Debate", "Judge_LLM", "PatchTST", "CustomGPT", "LSTN", "Ensemble", "Consensus", "Benchmark", "EVRPD_Buffer", "EVRPD_Export"],
+            "desc": "The architecture connects 4 heterogeneous Casablanca data sources, synchronizes them in UTC+1, extracts STL components and 3D patches, optimizes hyperparameters via Optuna and multi-agent debate, trains 3 deep competitive models, produces a robust consensus, and feeds it directly into the hybrid EV-Drone routing solver.",
+            "math": r"\text{Complete Pipeline: } \mathcal{D}_{\text{raw}} \xrightarrow{\text{STL / RevIN}} \mathbf{X}_{3D} \xrightarrow{\text{HPO / LLM}} \mathbf{\Theta}^* \xrightarrow{\text{Deep AI}} \{\hat{y}_m\} \xrightarrow{\text{Consensus}} \hat{\mathbf{Y}} \xrightarrow{\text{Buffer}} \text{EVRPD}(\text{EV}, \text{Drone})",
+            "io": "Input: 4 hourly data streams (Demand, Weather, Traffic, Calendar) ➔ Output: Optimal routes for 50 Electric Vehicles and 100 Drones.",
+            "casablanca": "Covers the Casablanca metropolis (Maarif, Sidi Belyout, Ain Sebaa, Oulfa, etc.) with 3,000 clients and real OSRM road & NFZ constraints."
+        },
+        1: {
+            "title": "STEP 01 / 08 · Multivariate Ingestion of the 4 Time Series",
+            "subtitle": "Hourly sampling of NHPP parcel demand, Casablanca weather, road traffic, and calendar.",
+            "color": "#06B6D4",
+            "active_nodes": ["DemandeNHPP", "Meteo", "Trafic", "Calendrier"],
+            "desc": "Continuous 1-hour resolution capture of parcel demand (non-homogeneous Poisson process parametrized by lambda_0, beta_h, gamma_d, alpha_z), live OpenWeather feeds (temperature, wind, gusts, rainfall), OSRM traffic congestion indices, and Moroccan calendar events (Ramadan, working days/public holidays).",
+            "math": r"\lambda(t, z) = \lambda_0 \cdot \alpha_z \cdot \beta_{h(t)} \cdot \gamma_{d(t)} \cdot \big[1 + \delta_{\text{traffic}}(t)\big] \cdot \Phi_{\text{weather}}(t)",
+            "io": r"Input: Sensors & APIs ➔ Output: Multivariate matrix $\mathbf{Z} \in \mathbb{R}^{T \times 4}$ spanning 8,760h (1 yr) to 26,280h (3 yrs).",
+            "casablanca": "Zone-specific modeling across Casablanca's 3 sectors: Zone A (dense central), Zone B (industrial), Zone C (peripheral)."
+        },
+        2: {
+            "title": "STEP 02 / 08 · Preprocessing: UTC+1 Alignment, STL & 3D Patching (RevIN)",
+            "subtitle": "Africa/Casablanca synchronization, STL decomposition, and O(N^2) 3D patching.",
+            "color": "#A855F7",
+            "active_nodes": ["Sync", "STL", "Patching"],
+            "desc": "Strict UTC+1 Africa/Casablanca time synchronization, missing-value imputation, STL decomposition (Trend + Seasonality + Remainder), and time series segmentation into 3D patches with Reversible Normalization (RevIN) to eliminate non-stationary distribution drift.",
+            "math": r"X_t = T_t + S_t + R_t \quad;\quad \mathbf{X}_{\text{norm}} = \frac{\mathbf{X} - \mathbb{E}[\mathbf{X}]}{\sqrt{\mathbb{V}\text{ar}[\mathbf{X}] + \epsilon}} \quad;\quad \mathbf{P} \in \mathbb{R}^{B \times M \times P \times N}",
+            "io": r"Input: Aligned time series $\mathbf{Z}$ ➔ Output: 3D patch tensor $\mathbf{P}$ prepared for Transformer attention.",
+            "casablanca": "Isolates daily urban delivery cycles (08:00 - 18:00) and traffic congestion surges on major boulevards (Zerktouni, Roudani)."
+        },
+        3: {
+            "title": "STEP 03 / 08 · Dual-Engine HPO: Optuna Exploration & Multi-Agent Debate",
+            "subtitle": "Joint Bayesian TPE optimization alongside adversarial debate (Web, Scholar, Reasoner).",
+            "color": "#F59E0B",
+            "active_nodes": ["HPO_Optuna", "Agentic_Debate"],
+            "desc": "Collaborative search for optimal hyperparameters combining two engines: the Bayesian Tree-structured Parzen Estimator (Optuna) and an adversarial debate between 3 AI specialists (Web Researcher, ArXiv Scholar, Logical Reasoner).",
+            "math": r"\theta^* = \arg\min_{\theta \in \Omega} \mathbb{E}_{\text{val}}\big[\mathcal{L}_{\text{MSE}}(f_\theta(\mathbf{X}), \mathbf{Y})\big] \quad\text{with TPE exploration } \frac{p(\theta | y < y^*)}{p(\theta | y \ge y^*)}",
+            "io": r"Input: Search space $\Omega$ (learning rate, heads, patch size) ➔ Output: Top candidate parameter sets and critical arguments.",
+            "casablanca": "Optimizes model responsiveness to sudden Atlantic coastal weather fluctuations."
+        },
+        4: {
+            "title": "STEP 04 / 08 · LLM Judge Arbitration & Hyperparameter Synthesis",
+            "subtitle": "Formal validation by the LLM Judge and optimal parametric configuration of deep architectures.",
+            "color": "#F43F5E",
+            "active_nodes": ["Judge_LLM"],
+            "desc": "The LLM Judge Arbitrator analyzes Optuna trial convergence and agent debate arguments, prunes overparameterized setups prone to overfitting, and validates the final optimal configuration for each model.",
+            "math": r"\text{Score}_{\text{Judge}}(\theta) = 0.5 \cdot \text{Score}_{\text{Optuna}} + 0.3 \cdot \text{Penalty}_{\text{Complexity}} + 0.2 \cdot \text{Consistency}_{\text{Agents}}",
+            "io": r"Input: Bayesian trials + Agent recommendations ➔ Output: Frozen model configuration file $\theta^*_{\text{model}}$.",
+            "casablanca": "Guarantees lightweight, highly responsive models delivering local inference in under 30 ms."
+        },
+        5: {
+            "title": "STEP 05 / 08 · Parallel Training of the 3 AI Models (PatchTST, GPT, LSTN)",
+            "subtitle": "Simultaneous inference and learning across deep time-series architectures.",
+            "color": "#3B82F6",
+            "active_nodes": ["PatchTST", "CustomGPT", "LSTN"],
+            "desc": "Concurrent execution of the 3 benchmark models: PatchTST (ultra-efficient channel-independent Transformer), Custom GPT (autoregressive causal masked attention), and LSTN (hybrid short-term / long-term recurrent transformer).",
+            "math": r"\text{Attention}(\mathbf{Q}, \mathbf{K}, \mathbf{V}) = \text{softmax}\left(\frac{\mathbf{Q}\mathbf{K}^T}{\sqrt{d_k}}\right)\mathbf{V} \quad;\quad \hat{y}_{\text{PatchTST}}, \, \hat{y}_{\text{GPT}}, \, \hat{y}_{\text{LSTN}}",
+            "io": r"Input: 3D patches $\mathbf{P}$ ➔ Output: 3 independent forecasting curves for future delivery horizons.",
+            "casablanca": "Generates hour-by-hour order predictions across all districts of Casablanca."
+        },
+        6: {
+            "title": "STEP 06 / 08 · Meta-Ensemble Aggregation & Consensus Score Evaluation",
+            "subtitle": "Adaptive inverse-variance weighting and agreement variance verification (< 0.15).",
+            "color": "#10B981",
+            "active_nodes": ["Ensemble", "Consensus"],
+            "desc": "Mathematical fusion of the 3 model predictions via adaptive inverse-variance weighting. Calculation of the consensus score to quantify mutual model confidence for each delivery hour.",
+            "math": r"w_m = \frac{\sigma_m^{-2}}{\sum_k \sigma_k^{-2}} \quad;\quad \hat{y}_{\text{consensus}} = \sum_{m=1}^3 w_m \cdot \hat{y}_m \quad;\quad \text{Score}_{\text{agreement}} = 1 - \frac{\text{Var}(\{\hat{y}_m\})}{\bar{y}^2}",
+            "io": r"Input: 3 AI forecasts $\hat{y}_m$ ➔ Output: Consolidated Consensus forecast $\hat{y}_{\text{consensus}}$ with 95% confidence interval.",
+            "casablanca": "Eliminates false demand peaks and secures parcel volume estimations for the Sidi Bernoussi depot.",
+        },
+        7: {
+            "title": "STEP 07 / 08 · Scientific Metric Benchmark (MAE, RMSE, sMAPE, R²)",
+            "subtitle": "Multi-horizon comparative evaluation (24h, 168h, 720h, 365d) and empirical validation.",
+            "color": "#14B8A6",
+            "active_nodes": ["Benchmark"],
+            "desc": "Rigorous computation of performance indicators for each individual model versus the consensus. Test-set validation prior to dispatching orders to operational field routing.",
+            "math": r"\text{RMSE} = \sqrt{\frac{1}{N}\sum (y_i - \hat{y}_i)^2} = 1.34 \quad;\quad \text{MAE} = 0.98 \quad;\quad R^2 = 0.957 \quad;\quad \text{MAPE} = 4.65\%",
+            "io": r"Input: Predictions vs Observed ground truth ➔ Output: Official comparative benchmark scoreboard and certification status.",
+            "casablanca": "Confirms average forecasting error is below 1 order per day across the entire Casablanca metropolitan area."
+        },
+        8: {
+            "title": "STEP 08 / 08 · Stochastic Uncertainty Buffer & EVRPD Solver Injection",
+            "subtitle": "Dynamic safety margin (5%-25%) and direct transfer to hybrid truck-drone routing.",
+            "color": "#EAB308",
+            "active_nodes": ["EVRPD_Buffer", "EVRPD_Export"],
+            "desc": "Application of a stochastic uncertainty buffer tuned to weather confidence levels, followed by instant injection of predicted orders into the EVRPD optimization solver (MAPPO + NSGA-II).",
+            "math": r"\tilde{D}_i = \hat{D}_i \cdot (1 + \mu_{\text{buffer}}) \quad;\quad \min \Big\{ w_1 \cdot \text{Fleet}_{\text{cost}} + w_2 \cdot \text{CO}_2 + w_3 \cdot \text{Delay}_{\text{TW}} \Big\}",
+            "io": r"Input: Forecast demand $\hat{\mathbf{Y}}$ ➔ Output: Optimal routes for 50 EVs (cap 100) and 100 Drones (range 12 km).",
+            "casablanca": "Activates operational dispatching while strictly respecting Casablanca's 5 No-Fly Zones (NFZ)."
+        }
+    }
 
-    # Modal Diaporama (Plein Écran)
-    @st.dialog("🖥️ Mode Diaporama — Live Architecture & Pipeline Scientifique", width="large")
-    def _open_arch_diaporama_modal(initial_step=0):
-        st.markdown("""
-        <div style="background: #0B1329; border: 1px solid #38BDF8; border-radius: 8px; padding: 10px 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
-            <div style="color: #38BDF8; font-weight: 800; font-size: 15px; font-family: 'Segoe UI', monospace; display: flex; align-items: center; gap: 8px;">
-                <span>🖥️ PRÉSENTATION DIAPORAMA — PIPELINE COMPLET (18 NŒUDS · 20 FLUX)</span>
-            </div>
-            <span style="background: #1E293B; color: #94A3B8; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
-                Quitter avec la croix ou Échap
-            </span>
-        </div>
-        """, unsafe_allow_html=True)
+    step_info_map = step_info_map_en if is_en else step_info_map_fr
 
-        d_step = st.select_slider(
-            "📍 Choisir l'étape du pipeline à projeter :",
-            options=list(range(9)),
-            value=initial_step,
-            format_func=lambda s: "🌐 Vue Globale (Tous Flux Actifs)" if s == 0 else f"Étape {s} · {step_info_map[s]['title'].split('·')[1].strip() if '·' in step_info_map[s]['title'] else step_info_map[s]['title']}",
-            key="arch_diapo_step_slider"
-        )
-        
-        info = step_info_map[d_step]
-        
-        # Affichage du canvas SVG animé en grand format avec flux lumineux
-        svg_html = generate_pipeline_svg_html(d_step, height=480)
-        components.html(svg_html, height=500, scrolling=False)
-        
-        # Fiche scientifique détaillée pour la présentation
-        with st.container(border=True):
-            st.markdown(f"""
-            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 6px; margin-bottom: 10px;">
-                <div style="font-size: 16px; font-weight: 800; color: {info['color']};">
-                    {info['title']}
-                </div>
-                <span style="background: #0F172A; color: {info['color']}; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; font-family: monospace;">
-                    {len(info['active_nodes'])} Nœuds Actifs
-                </span>
-            </div>
-            """, unsafe_allow_html=True)
-            
-            c_dia1, c_dia2 = st.columns([1.2, 1.0])
-            with c_dia1:
-                st.markdown(f"**📖 Rôle & Fonction :** {info['desc']}")
-                st.markdown("**📐 Formulation Mathématique :**")
-                st.latex(info['math'])
-            with c_dia2:
-                st.info(f"**🔄 Flux I/O :** {info['io']}")
-                st.success(f"**📍 Métropole de Casablanca :** {info['casablanca']}")
+    # -------------------------------------------------------------------------
+    # CANVAS GRAPHIQUE SVG HAUTE FIDÉLITÉ (18 NŒUDS · 20 FLUX AVEC PASSAGE LUMINEUX)
+    # -------------------------------------------------------------------------
+    if is_en:
+        nodes_layout = {
+            # Col 1: Inputs (x = 100)
+            "DemandeNHPP": {"x": 100, "y": 90, "w": 140, "h": 52, "col": "#06B6D4", "title": "NHPP Demand", "sub": "Non-Homogeneous Poisson"},
+            "Meteo": {"x": 100, "y": 195, "w": 140, "h": 52, "col": "#06B6D4", "title": "Casablanca Weather", "sub": "Temp, Wind, Rain API"},
+            "Trafic": {"x": 100, "y": 300, "w": 140, "h": 52, "col": "#06B6D4", "title": "Traffic & Congestion", "sub": "Rush Hours Index"},
+            "Calendrier": {"x": 100, "y": 405, "w": 140, "h": 52, "col": "#06B6D4", "title": "Calendar & Holidays", "sub": "Ramadan & Morocco Holidays"},
+
+            # Col 2: Preprocessing (x = 300)
+            "Sync": {"x": 300, "y": 140, "w": 145, "h": 52, "col": "#A855F7", "title": "Multivariate Sync", "sub": "Africa/Casablanca UTC+1"},
+            "STL": {"x": 300, "y": 250, "w": 145, "h": 52, "col": "#A855F7", "title": "STL Decomposition", "sub": "Xt = Tt + St + Rt"},
+            "Patching": {"x": 300, "y": 360, "w": 145, "h": 52, "col": "#A855F7", "title": "3D Patching & RevIN", "sub": "Channels O(N^2) + Normal."},
+
+            # Col 3: HPO & LLM (x = 490)
+            "HPO_Optuna": {"x": 450, "y": 150, "w": 135, "h": 52, "col": "#F59E0B", "title": "Optuna TPE Engine", "sub": "Bayesian Multi-Trial"},
+            "Agentic_Debate": {"x": 595, "y": 150, "w": 135, "h": 52, "col": "#F59E0B", "title": "Multi-Agent Debate", "sub": "Web, Scholar, Reasoner"},
+            "Judge_LLM": {"x": 520, "y": 330, "w": 150, "h": 54, "col": "#F43F5E", "title": "LLM Judge Arbitrator", "sub": "Parametric Synthesis"},
+
+            # Col 4: AI Models (x = 750)
+            "PatchTST": {"x": 750, "y": 140, "w": 145, "h": 52, "col": "#3B82F6", "title": "PatchTST", "sub": "Channel-Independent"},
+            "CustomGPT": {"x": 750, "y": 250, "w": 145, "h": 52, "col": "#3B82F6", "title": "Custom GPT Forecaster", "sub": "Causal Masked Attention"},
+            "LSTN": {"x": 750, "y": 360, "w": 145, "h": 52, "col": "#3B82F6", "title": "LSTN Transformer", "sub": "Long & Short Term Dual"},
+
+            # Col 5: Consensus & Benchmark (x = 955)
+            "Ensemble": {"x": 955, "y": 150, "w": 145, "h": 52, "col": "#10B981", "title": "Meta-Model Ensemble", "sub": "Inv-Variance Weighting"},
+            "Consensus": {"x": 955, "y": 260, "w": 145, "h": 52, "col": "#10B981", "title": "Consensus Score", "sub": "Agreement Variance < 0.15"},
+            "Benchmark": {"x": 955, "y": 370, "w": 145, "h": 52, "col": "#14B8A6", "title": "Metrics Benchmark", "sub": "MAE, RMSE, sMAPE, R²"},
+
+            # Col 6: Export EVRPD (x = 1130)
+            "EVRPD_Buffer": {"x": 1130, "y": 200, "w": 135, "h": 52, "col": "#F43F5E", "title": "Uncertainty Buffer", "sub": "Safety Margin 5-25%"},
+            "EVRPD_Export": {"x": 1130, "y": 320, "w": 135, "h": 52, "col": "#EAB308", "title": "EVRPD Solver", "sub": "Hybrid MAPPO / NSGA-II"}
+        }
+    else:
+        nodes_layout = {
+            # Col 1: Inputs (x = 100)
+            "DemandeNHPP": {"x": 100, "y": 90, "w": 140, "h": 52, "col": "#06B6D4", "title": "Demande NHPP", "sub": "Poisson Non-Homogène"},
+            "Meteo": {"x": 100, "y": 195, "w": 140, "h": 52, "col": "#06B6D4", "title": "Météo Casablanca", "sub": "Temp, Vent, Pluie API"},
+            "Trafic": {"x": 100, "y": 300, "w": 140, "h": 52, "col": "#06B6D4", "title": "Trafic & Congestion", "sub": "Index Heures de Pointe"},
+            "Calendrier": {"x": 100, "y": 405, "w": 140, "h": 52, "col": "#06B6D4", "title": "Calendrier & Fêtes", "sub": "Ramadan & Fériés Maroc"},
+
+            # Col 2: Preprocessing (x = 300)
+            "Sync": {"x": 300, "y": 140, "w": 145, "h": 52, "col": "#A855F7", "title": "Sync Multivariée", "sub": "Africa/Casablanca UTC+1"},
+            "STL": {"x": 300, "y": 250, "w": 145, "h": 52, "col": "#A855F7", "title": "Décomposition STL", "sub": "Xt = Tt + St + Rt"},
+            "Patching": {"x": 300, "y": 360, "w": 145, "h": 52, "col": "#A855F7", "title": "Patching 3D & RevIN", "sub": "Canaux O(N^2) + Normal."},
+
+            # Col 3: HPO & LLM (x = 490)
+            "HPO_Optuna": {"x": 450, "y": 150, "w": 135, "h": 52, "col": "#F59E0B", "title": "Optuna TPE Engine", "sub": "Bayesian Multi-Trial"},
+            "Agentic_Debate": {"x": 595, "y": 150, "w": 135, "h": 52, "col": "#F59E0B", "title": "Débat Multi-Agents", "sub": "Web, Scholar, Reasoner"},
+            "Judge_LLM": {"x": 520, "y": 330, "w": 150, "h": 54, "col": "#F43F5E", "title": "Juge LLM Arbitre", "sub": "Synthèse Paramétrique"},
+
+            # Col 4: Modèles IA (x = 750)
+            "PatchTST": {"x": 750, "y": 140, "w": 145, "h": 52, "col": "#3B82F6", "title": "PatchTST", "sub": "Channel-Independent"},
+            "CustomGPT": {"x": 750, "y": 250, "w": 145, "h": 52, "col": "#3B82F6", "title": "Custom GPT Forecaster", "sub": "Causal Masked Attention"},
+            "LSTN": {"x": 750, "y": 360, "w": 145, "h": 52, "col": "#3B82F6", "title": "LSTN Transformer", "sub": "Long & Short Term Dual"},
+
+            # Col 5: Consensus & Benchmark (x = 955)
+            "Ensemble": {"x": 955, "y": 150, "w": 145, "h": 52, "col": "#10B981", "title": "Méta-Modèle Ensemble", "sub": "Pondération Inv-Variance"},
+            "Consensus": {"x": 955, "y": 260, "w": 145, "h": 52, "col": "#10B981", "title": "Score de Consensus", "sub": "Variance Accord < 0.15"},
+            "Benchmark": {"x": 955, "y": 370, "w": 145, "h": 52, "col": "#14B8A6", "title": "Benchmark Métriques", "sub": "MAE, RMSE, sMAPE, R²"},
+
+            # Col 6: Export EVRPD (x = 1130)
+            "EVRPD_Buffer": {"x": 1130, "y": 200, "w": 135, "h": 52, "col": "#F43F5E", "title": "Tampon Incertitude", "sub": "Marge Sécurité 5-25%"},
+            "EVRPD_Export": {"x": 1130, "y": 320, "w": 135, "h": 52, "col": "#EAB308", "title": "Solveur EVRPD", "sub": "MAPPO / NSGA-II Hybride"}
+        }
+
+    edges_list = [
+        ("DemandeNHPP", "Sync", "#06B6D4"),
+        ("Meteo", "Sync", "#06B6D4"),
+        ("Trafic", "Sync", "#06B6D4"),
+        ("Calendrier", "Sync", "#06B6D4"),
+        ("Sync", "STL", "#A855F7"),
+        ("STL", "Patching", "#A855F7"),
+        ("Patching", "HPO_Optuna", "#F59E0B"),
+        ("Patching", "Agentic_Debate", "#F59E0B"),
+        ("HPO_Optuna", "Judge_LLM", "#F59E0B"),
+        ("Agentic_Debate", "Judge_LLM", "#F59E0B"),
+        ("Judge_LLM", "PatchTST", "#3B82F6"),
+        ("Judge_LLM", "CustomGPT", "#3B82F6"),
+        ("Judge_LLM", "LSTN", "#3B82F6"),
+        ("PatchTST", "Ensemble", "#3B82F6"),
+        ("CustomGPT", "Ensemble", "#3B82F6"),
+        ("LSTN", "Ensemble", "#3B82F6"),
+        ("Ensemble", "Consensus", "#10B981"),
+        ("Consensus", "Benchmark", "#10B981"),
+        ("Consensus", "EVRPD_Buffer", "#EAB308"),
+        ("EVRPD_Buffer", "EVRPD_Export", "#EAB308")
+    ]
 
     # Helper de génération du code SVG complet avec passage lumineux animé
-    def generate_pipeline_svg_html(step_idx=0, height=490):
+    def generate_pipeline_svg_html(step_idx=0, height=490, is_english=False):
         s_info = step_info_map[step_idx]
         act_nodes = set(s_info["active_nodes"])
         is_glob = (step_idx == 0)
@@ -2194,23 +2341,23 @@ elif current_view == "Live Architecture":
                 edge_svg = f'<path d="{path_d}" fill="none" stroke="{col}" stroke-width="2.6" opacity="0.95" class="laser-active" filter="url(#glow-particle)"/>'
                 
                 # Double photon lumineux voyageant le long de la ligne
-                p1 = f'''<circle r="4" fill="{col}" filter="url(#glow-particle)">
+                p1 = f"""<circle r="4" fill="{col}" filter="url(#glow-particle)">
                     <animateMotion path="{path_d}" dur="2.0s" repeatCount="indefinite" />
                 </circle>
                 <circle r="2.2" fill="#FFFFFF">
                     <animateMotion path="{path_d}" dur="2.0s" repeatCount="indefinite" />
-                </circle>'''
+                </circle>"""
                 
-                p2 = f'''<circle r="3" fill="{col}" opacity="0.8" filter="url(#glow-particle)">
+                p2 = f"""<circle r="3" fill="{col}" opacity="0.8" filter="url(#glow-particle)">
                     <animateMotion path="{path_d}" dur="2.0s" begin="-1.0s" repeatCount="indefinite" />
-                </circle>'''
+                </circle>"""
                 
                 # Anneau récepteur au nœud cible avec radar pulse
-                target_ping = f'''<circle cx="{x2}" cy="{y2}" r="3.5" fill="{col}"/>
+                target_ping = f"""<circle cx="{x2}" cy="{y2}" r="3.5" fill="{col}"/>
                 <circle cx="{x2}" cy="{y2}" r="6" fill="none" stroke="{col}" stroke-width="1.5">
                     <animate attributeName="r" values="3;7.5;3" dur="1.5s" repeatCount="indefinite"/>
                     <animate attributeName="opacity" values="0.9;0.1;0.9" dur="1.5s" repeatCount="indefinite"/>
-                </circle>'''
+                </circle>"""
                 
                 svg_edges.append(f"{edge_svg}\n{p1}\n{p2}\n{target_ping}")
             else:
@@ -2218,6 +2365,7 @@ elif current_view == "Live Architecture":
                 target_ping = f'<circle cx="{x2}" cy="{y2}" r="2.5" fill="#334155" opacity="0.25"/>'
                 svg_edges.append(f"{edge_svg}\n{target_ping}")
 
+        chip_txt = "ACTIVE" if is_english else "ACTIF"
         svg_nodes = []
         for nid, n in nodes_layout.items():
             is_active = is_glob or (nid in act_nodes)
@@ -2233,16 +2381,16 @@ elif current_view == "Live Architecture":
             pulse_beacon = ""
             if is_active:
                 if not is_glob:
-                    active_chip = f'<rect x="{x_left + n["w"] - 40}" y="{y_top - 7}" width="38" height="14" rx="4" fill="{n["col"]}"/><text x="{x_left + n["w"] - 21}" y="{y_top + 4}" fill="#000000" font-size="8.5" font-weight="900" text-anchor="middle">ACTIF</text>'
+                    active_chip = f'<rect x="{x_left + n["w"] - 42}" y="{y_top - 7}" width="40" height="14" rx="4" fill="{n["col"]}"/><text x="{x_left + n["w"] - 22}" y="{y_top + 4}" fill="#000000" font-size="8.5" font-weight="900" text-anchor="middle">{chip_txt}</text>'
                 
                 # Balise lumineuse pulsante
-                pulse_beacon = f'''
+                pulse_beacon = f"""
                 <circle cx="{x_left + 14}" cy="{y_top + 18}" r="4" fill="{n['col']}">
                     <animate attributeName="r" values="3.5;6.5;3.5" dur="1.8s" repeatCount="indefinite"/>
                     <animate attributeName="opacity" values="1;0.35;1" dur="1.8s" repeatCount="indefinite"/>
                 </circle>
                 <circle cx="{x_left + 14}" cy="{y_top + 18}" r="2.2" fill="#FFFFFF"/>
-                '''
+                """
             else:
                 pulse_beacon = f'<circle cx="{x_left + 14}" cy="{y_top + 18}" r="3.5" fill="{n["col"]}" opacity="0.4"/>'
 
@@ -2257,14 +2405,25 @@ elif current_view == "Live Architecture":
 {active_chip}
 </g>""")
 
-        col_headers = [
-            (100, "1. INGESTION (4 SOURCES)", "#06B6D4"),
-            (300, "2. PRÉTRAITEMENT STL", "#A855F7"),
-            (520, "3. HPO & DÉBAT LLM", "#F59E0B"),
-            (750, "4. MODÈLES IA (3)", "#3B82F6"),
-            (955, "5. CONSENSUS & BENCHMARK", "#10B981"),
-            (1130, "6. EXPORT EVRPD", "#EAB308")
-        ]
+        if is_english:
+            col_headers = [
+                (100, "1. INGESTION (4 SOURCES)", "#06B6D4"),
+                (300, "2. STL PREPROCESSING", "#A855F7"),
+                (520, "3. HPO & LLM DEBATE", "#F59E0B"),
+                (750, "4. AI MODELS (3)", "#3B82F6"),
+                (955, "5. CONSENSUS & BENCHMARK", "#10B981"),
+                (1130, "6. EVRPD EXPORT", "#EAB308")
+            ]
+        else:
+            col_headers = [
+                (100, "1. INGESTION (4 SOURCES)", "#06B6D4"),
+                (300, "2. PRÉTRAITEMENT STL", "#A855F7"),
+                (520, "3. HPO & DÉBAT LLM", "#F59E0B"),
+                (750, "4. MODÈLES IA (3)", "#3B82F6"),
+                (955, "5. CONSENSUS & BENCHMARK", "#10B981"),
+                (1130, "6. EXPORT EVRPD", "#EAB308")
+            ]
+
         svg_col_headers = "".join([
             f'<text x="{cx}" y="32" fill="{col}" font-size="10" font-weight="900" font-family="monospace" text-anchor="middle" letter-spacing="1">{txt}</text>'
             for cx, txt, col in col_headers
@@ -2329,6 +2488,75 @@ elif current_view == "Live Architecture":
 </body>
 </html>"""
 
+    # -------------------------------------------------------------------------
+    # BARRE D'INDICATEURS D'ÉTAPES & CONTRÔLE DIAPORAMA
+    # -------------------------------------------------------------------------
+    cur_s_idx = st.session_state["arch_step"]
+    cur_info = step_info_map[cur_s_idx]
+    trigger_arch_diapo = False
+
+    # Modal Diaporama (Plein Écran)
+    modal_title = "🖥️ Slideshow Mode — Live Architecture & Scientific Pipeline" if is_en else "🖥️ Mode Diaporama — Live Architecture & Pipeline Scientifique"
+    @st.dialog(modal_title, width="large")
+    def _open_arch_diaporama_modal(initial_step=0):
+        banner_title = "🖥️ SLIDESHOW PRESENTATION — COMPLETE PIPELINE (18 NODES · 20 FLOWS)" if is_en else "🖥️ PRÉSENTATION DIAPORAMA — PIPELINE COMPLET (18 NŒUDS · 20 FLUX)"
+        exit_hint = "Close with cross or Esc" if is_en else "Quitter avec la croix ou Échap"
+        st.markdown(f"""
+        <div style="background: #0B1329; border: 1px solid #38BDF8; border-radius: 8px; padding: 10px 18px; margin-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+            <div style="color: #38BDF8; font-weight: 800; font-size: 15px; font-family: 'Segoe UI', monospace; display: flex; align-items: center; gap: 8px;">
+                <span>{banner_title}</span>
+            </div>
+            <span style="background: #1E293B; color: #94A3B8; padding: 4px 10px; border-radius: 6px; font-size: 12px; font-weight: 600;">
+                {exit_hint}
+            </span>
+        </div>
+        """, unsafe_allow_html=True)
+
+        slider_lbl = "📍 Choose pipeline step to project:" if is_en else "📍 Choisir l'étape du pipeline à projeter :"
+        glob_lbl = "🌐 Global View (All Flows Active)" if is_en else "🌐 Vue Globale (Tous Flux Actifs)"
+        step_word = "Step" if is_en else "Étape"
+        d_step = st.select_slider(
+            slider_lbl,
+            options=list(range(9)),
+            value=initial_step,
+            format_func=lambda s: glob_lbl if s == 0 else f"{step_word} {s} · {step_info_map[s]['title'].split('·')[1].strip() if '·' in step_info_map[s]['title'] else step_info_map[s]['title']}",
+            key="arch_diapo_step_slider"
+        )
+        
+        info = step_info_map[d_step]
+        
+        # Affichage du canvas SVG animé en grand format avec flux lumineux
+        svg_html = generate_pipeline_svg_html(d_step, height=480, is_english=is_en)
+        components.html(svg_html, height=500, scrolling=False)
+        
+        nodes_word = "Active Nodes" if is_en else "Nœuds Actifs"
+        lbl_role = "**📖 Role & Operational Function:**" if is_en else "**📖 Rôle & Fonction :**"
+        lbl_math = "**📐 Mathematical Formulation:**" if is_en else "**📐 Formulation Mathématique :**"
+        lbl_io = "**🔄 I/O Data Flows:**" if is_en else "**🔄 Flux I/O :**"
+        lbl_casa = "**📍 Casablanca Metropolis:**" if is_en else "**📍 Métropole de Casablanca :**"
+
+        # Fiche scientifique détaillée pour la présentation
+        with st.container(border=True):
+            st.markdown(f"""
+            <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #E2E8F0; padding-bottom: 6px; margin-bottom: 10px;">
+                <div style="font-size: 16px; font-weight: 800; color: {info['color']};">
+                    {info['title']}
+                </div>
+                <span style="background: #0F172A; color: {info['color']}; padding: 3px 10px; border-radius: 6px; font-size: 11px; font-weight: 700; font-family: monospace;">
+                    {len(info['active_nodes'])} {nodes_word}
+                </span>
+            </div>
+            """, unsafe_allow_html=True)
+            
+            c_dia1, c_dia2 = st.columns([1.2, 1.0])
+            with c_dia1:
+                st.markdown(f"{lbl_role} {info['desc']}")
+                st.markdown(lbl_math)
+                st.latex(info['math'])
+            with c_dia2:
+                st.info(f"{lbl_io} {info['io']}")
+                st.success(f"{lbl_casa} {info['casablanca']}")
+
     # Layout Barre Supérieure avec Touche Diaporama & Synchronisation Live Système
     sys_info = step_info_map.get(sys_step, step_info_map[0])
     
@@ -2336,33 +2564,43 @@ elif current_view == "Live Architecture":
         # 1. Bandeau de Suivi en Direct du Système
         sync_c1, sync_c2 = st.columns([3.0, 1.3])
         with sync_c1:
-            step_badge_txt = "🌐 VUE GLOBALE" if sys_step == 0 else f"ÉTAPE {sys_step} / 08 · {sys_info['title'].split('·')[-1].strip() if '·' in sys_info['title'] else sys_info['title']}"
+            if is_en:
+                step_badge_txt = "🌐 GLOBAL VIEW" if sys_step == 0 else f"STEP {sys_step} / 08 · {sys_info['title'].split('·')[-1].strip() if '·' in sys_info['title'] else sys_info['title']}"
+                sys_title_lbl = "📍 LIVE SYSTEM REAL-TIME STATUS:"
+                last_act_lbl = "Last executed action:"
+            else:
+                step_badge_txt = "🌐 VUE GLOBALE" if sys_step == 0 else f"ÉTAPE {sys_step} / 08 · {sys_info['title'].split('·')[-1].strip() if '·' in sys_info['title'] else sys_info['title']}"
+                sys_title_lbl = "📍 ÉTAT RÉEL DU SYSTÈME EN DIRECT :"
+                last_act_lbl = "Dernière action exécutée :"
+
             st.markdown(f"""
             <div style="display: flex; align-items: center; gap: 12px;">
                 <div style="width: 14px; height: 14px; border-radius: 50%; background: #10B981; box-shadow: 0 0 12px #10B981; flex-shrink: 0;"></div>
                 <div>
                     <div style="font-size: 13.5px; font-weight: 800; color: #0F172A; display: flex; align-items: center; gap: 8px;">
-                        <span>📍 ÉTAT RÉEL DU SYSTÈME EN DIRECT :</span>
+                        <span>{sys_title_lbl}</span>
                         <span style="color: {sys_info['color']}; background: #0F172A; padding: 2px 8px; border-radius: 6px; font-family: monospace; font-size: 12px;">
                             {step_badge_txt}
                         </span>
                     </div>
                     <div style="font-size: 12px; color: #64748B; margin-top: 2px;">
-                        Dernière action exécutée : <strong style="color: #0F172A;">{sys_status}</strong> {f'· ({sys_time})' if sys_time else ''}
+                        {last_act_lbl} <strong style="color: #0F172A;">{sys_status}</strong> {f'· ({sys_time})' if sys_time else ''}
                     </div>
                 </div>
             </div>
             """, unsafe_allow_html=True)
         with sync_c2:
             if cur_s_idx != sys_step and sys_step > 0:
-                if st.button(f"🎯 Caler sur l'état système (Étape {sys_step})", key="btn_sync_sys_step", use_container_width=True, type="primary"):
+                btn_sync_txt = f"🎯 Sync with system (Step {sys_step})" if is_en else f"🎯 Caler sur l'état système (Étape {sys_step})"
+                if st.button(btn_sync_txt, key="btn_sync_sys_step", use_container_width=True, type="primary"):
                     st.session_state["arch_step"] = sys_step
                     st.rerun()
             else:
-                st.markdown("""
+                synced_lbl = "✓ Diagram Synchronized" if is_en else "✓ Schéma Synchronisé"
+                st.markdown(f"""
                 <div style="text-align: right; padding-top: 4px;">
                     <span style="background: #ECFDF5; border: 1px solid #A7F3D0; color: #065F46; padding: 5px 12px; border-radius: 6px; font-size: 11px; font-weight: 700; font-family: monospace;">
-                        ✓ Schéma Synchronisé
+                        {synced_lbl}
                     </span>
                 </div>
                 """, unsafe_allow_html=True)
@@ -2383,11 +2621,16 @@ elif current_view == "Live Architecture":
         with col_ctrl2:
             col_d_btn, col_d_badge = st.columns([1.2, 1.1])
             with col_d_btn:
-                if st.button("🖥️ Mode Diaporama", key="btn_trigger_arch_diapo", type="primary", use_container_width=True, help="Ouvrir le mode présentation plein écran du pipeline"):
+                diapo_btn_txt = "🖥️ Slideshow Mode" if is_en else "🖥️ Mode Diaporama"
+                diapo_btn_help = "Open full-screen pipeline presentation mode" if is_en else "Ouvrir le mode présentation plein écran du pipeline"
+                if st.button(diapo_btn_txt, key="btn_trigger_arch_diapo", type="primary", use_container_width=True, help=diapo_btn_help):
                     trigger_arch_diapo = True
             with col_d_badge:
                 badge_bg = "#10B981" if (cur_s_idx == sys_step or cur_s_idx == 0) else "#3B82F6"
-                badge_txt = "● SYNCHRONISÉ" if cur_s_idx == sys_step else "● NAVIGATION"
+                if is_en:
+                    badge_txt = "● SYNCHRONIZED" if cur_s_idx == sys_step else "● BROWSING"
+                else:
+                    badge_txt = "● SYNCHRONISÉ" if cur_s_idx == sys_step else "● NAVIGATION"
                 st.markdown(f"""
                 <div style="text-align: right; margin-top: 3px;">
                     <span style="background: {badge_bg}; color: white; padding: 6px 12px; border-radius: 9999px; font-size: 11px; font-weight: 700; font-family: monospace; display: inline-block;">
@@ -2399,88 +2642,44 @@ elif current_view == "Live Architecture":
         # 3. Boutons de navigation pas-à-pas avec indicateur LIVE sur l'étape du système
         st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
         b_c0, b_c1, b_c2, b_c3, b_c4, b_c5, b_c6, b_c7, b_c8 = st.columns(9)
-        step_btns_def = [
-            (b_c0, 0, "🌐 Vue Globale"),
-            (b_c1, 1, "1. Ingestion"),
-            (b_c2, 2, "2. STL / 3D"),
-            (b_c3, 3, "3. HPO LLM"),
-            (b_c4, 4, "4. Juge LLM"),
-            (b_c5, 5, "5. Modèles IA"),
-            (b_c6, 6, "6. Consensus"),
-            (b_c7, 7, "7. Benchmark"),
-            (b_c8, 8, "8. EVRPD")
-        ]
+        if is_en:
+            step_btns_def = [
+                (b_c0, 0, "🌐 Global View"),
+                (b_c1, 1, "1. Ingestion"),
+                (b_c2, 2, "2. STL / 3D"),
+                (b_c3, 3, "3. HPO LLM"),
+                (b_c4, 4, "4. LLM Judge"),
+                (b_c5, 5, "5. AI Models"),
+                (b_c6, 6, "6. Consensus"),
+                (b_c7, 7, "7. Benchmark"),
+                (b_c8, 8, "8. EVRPD")
+            ]
+        else:
+            step_btns_def = [
+                (b_c0, 0, "🌐 Vue Globale"),
+                (b_c1, 1, "1. Ingestion"),
+                (b_c2, 2, "2. STL / 3D"),
+                (b_c3, 3, "3. HPO LLM"),
+                (b_c4, 4, "4. Juge LLM"),
+                (b_c5, 5, "5. Modèles IA"),
+                (b_c6, 6, "6. Consensus"),
+                (b_c7, 7, "7. Benchmark"),
+                (b_c8, 8, "8. EVRPD")
+            ]
         for col_b, s_idx, lbl in step_btns_def:
             with col_b:
                 is_sys = (s_idx == sys_step and sys_step > 0)
                 display_lbl = f"{lbl} ●" if is_sys else lbl
                 b_type = "primary" if cur_s_idx == s_idx else "secondary"
-                if st.button(display_lbl, key=f"arch_btn_{s_idx}", use_container_width=True, type=b_type, help=f"Étape où se trouve actuellement le système ({sys_status})" if is_sys else None):
+                step_help_txt = (f"Current stage of the system ({sys_status})" if is_en else f"Étape où se trouve actuellement le système ({sys_status})") if is_sys else None
+                if st.button(display_lbl, key=f"arch_btn_{s_idx}", use_container_width=True, type=b_type, help=step_help_txt):
                     st.session_state["arch_step"] = s_idx
                     st.rerun()
-
-    # -------------------------------------------------------------------------
-    # CANVAS GRAPHIQUE SVG HAUTE FIDÉLITÉ (18 NŒUDS · 20 FLUX AVEC PASSAGE LUMINEUX)
-    # -------------------------------------------------------------------------
-    nodes_layout = {
-        # Col 1: Inputs (x = 100)
-        "DemandeNHPP": {"x": 100, "y": 90, "w": 140, "h": 52, "col": "#06B6D4", "title": "Demande NHPP", "sub": "Poisson Non-Homogène"},
-        "Meteo": {"x": 100, "y": 195, "w": 140, "h": 52, "col": "#06B6D4", "title": "Météo Casablanca", "sub": "Temp, Vent, Pluie API"},
-        "Trafic": {"x": 100, "y": 300, "w": 140, "h": 52, "col": "#06B6D4", "title": "Trafic & Congestion", "sub": "Index Heures de Pointe"},
-        "Calendrier": {"x": 100, "y": 405, "w": 140, "h": 52, "col": "#06B6D4", "title": "Calendrier & Fêtes", "sub": "Ramadan & Fériés Maroc"},
-
-        # Col 2: Preprocessing (x = 300)
-        "Sync": {"x": 300, "y": 140, "w": 145, "h": 52, "col": "#A855F7", "title": "Sync Multivariée", "sub": "Africa/Casablanca UTC+1"},
-        "STL": {"x": 300, "y": 250, "w": 145, "h": 52, "col": "#A855F7", "title": "Décomposition STL", "sub": "Xt = Tt + St + Rt"},
-        "Patching": {"x": 300, "y": 360, "w": 145, "h": 52, "col": "#A855F7", "title": "Patching 3D & RevIN", "sub": "Canaux O(N^2) + Normal."},
-
-        # Col 3: HPO & LLM (x = 490)
-        "HPO_Optuna": {"x": 450, "y": 150, "w": 135, "h": 52, "col": "#F59E0B", "title": "Optuna TPE Engine", "sub": "Bayesian Multi-Trial"},
-        "Agentic_Debate": {"x": 595, "y": 150, "w": 135, "h": 52, "col": "#F59E0B", "title": "Débat Multi-Agents", "sub": "Web, Scholar, Reasoner"},
-        "Judge_LLM": {"x": 520, "y": 330, "w": 150, "h": 54, "col": "#F43F5E", "title": "Juge LLM Arbitre", "sub": "Synthèse Paramétrique"},
-
-        # Col 4: Modèles IA (x = 750)
-        "PatchTST": {"x": 750, "y": 140, "w": 145, "h": 52, "col": "#3B82F6", "title": "PatchTST", "sub": "Channel-Independent"},
-        "CustomGPT": {"x": 750, "y": 250, "w": 145, "h": 52, "col": "#3B82F6", "title": "Custom GPT Forecaster", "sub": "Causal Masked Attention"},
-        "LSTN": {"x": 750, "y": 360, "w": 145, "h": 52, "col": "#3B82F6", "title": "LSTN Transformer", "sub": "Long & Short Term Dual"},
-
-        # Col 5: Consensus & Benchmark (x = 955)
-        "Ensemble": {"x": 955, "y": 150, "w": 145, "h": 52, "col": "#10B981", "title": "Méta-Modèle Ensemble", "sub": "Pondération Inv-Variance"},
-        "Consensus": {"x": 955, "y": 260, "w": 145, "h": 52, "col": "#10B981", "title": "Score de Consensus", "sub": "Variance Accord < 0.15"},
-        "Benchmark": {"x": 955, "y": 370, "w": 145, "h": 52, "col": "#14B8A6", "title": "Benchmark Métriques", "sub": "MAE, RMSE, sMAPE, R²"},
-
-        # Col 6: Export EVRPD (x = 1130)
-        "EVRPD_Buffer": {"x": 1130, "y": 200, "w": 135, "h": 52, "col": "#F43F5E", "title": "Tampon Incertitude", "sub": "Marge Sécurité 5-25%"},
-        "EVRPD_Export": {"x": 1130, "y": 320, "w": 135, "h": 52, "col": "#EAB308", "title": "Solveur EVRPD", "sub": "MAPPO / NSGA-II Hybride"}
-    }
-
-    edges_list = [
-        ("DemandeNHPP", "Sync", "#06B6D4"),
-        ("Meteo", "Sync", "#06B6D4"),
-        ("Trafic", "Sync", "#06B6D4"),
-        ("Calendrier", "Sync", "#06B6D4"),
-        ("Sync", "STL", "#A855F7"),
-        ("STL", "Patching", "#A855F7"),
-        ("Patching", "HPO_Optuna", "#F59E0B"),
-        ("Patching", "Agentic_Debate", "#F59E0B"),
-        ("HPO_Optuna", "Judge_LLM", "#F59E0B"),
-        ("Agentic_Debate", "Judge_LLM", "#F59E0B"),
-        ("Judge_LLM", "PatchTST", "#3B82F6"),
-        ("Judge_LLM", "CustomGPT", "#3B82F6"),
-        ("Judge_LLM", "LSTN", "#3B82F6"),
-        ("PatchTST", "Ensemble", "#3B82F6"),
-        ("CustomGPT", "Ensemble", "#3B82F6"),
-        ("LSTN", "Ensemble", "#3B82F6"),
-        ("Ensemble", "Consensus", "#10B981"),
-        ("Consensus", "Benchmark", "#10B981"),
-        ("Consensus", "EVRPD_Buffer", "#EAB308"),
-        ("EVRPD_Buffer", "EVRPD_Export", "#EAB308")
-    ]
 
     # Emplacement dynamique pour le SVG (permet l'animation en direct pendant la simulation)
     svg_placeholder = st.empty()
     with svg_placeholder:
-        components.html(generate_pipeline_svg_html(cur_s_idx, height=490), height=520, scrolling=False)
+        components.html(generate_pipeline_svg_html(cur_s_idx, height=490, is_english=is_en), height=520, scrolling=False)
 
     # Déclenchement du Mode Diaporama si cliqué
     if trigger_arch_diapo:
@@ -2491,13 +2690,15 @@ elif current_view == "Live Architecture":
     # -------------------------------------------------------------------------
     with st.container(border=True):
         sim_col1, sim_col2, sim_col3, sim_col4 = st.columns([1.8, 1.2, 4.0, 2.0])
+        sim_run_lbl = "▶ Visual Simulation" if is_en else "▶ Simulation Visuelle"
+        sim_stop_lbl = "■ Stop" if is_en else "■ Arrêter"
         with sim_col1:
-            run_sim = st.button("▶ Simulation Visuelle", key="btn_run_vis_sim", use_container_width=True, type="primary")
+            run_sim = st.button(sim_run_lbl, key="btn_run_vis_sim", use_container_width=True, type="primary")
         with sim_col2:
-            stop_sim = st.button("■ Arrêter", key="btn_stop_vis_sim", use_container_width=True)
+            stop_sim = st.button(sim_stop_lbl, key="btn_stop_vis_sim", use_container_width=True)
         with sim_col3:
             if cur_s_idx == 0:
-                phase_txt = "En attente de simulation..."
+                phase_txt = "Waiting for simulation..." if is_en else "En attente de simulation..."
                 phase_col = "#7DD3FC"
             else:
                 phase_txt = f"{cur_info['title']}"
@@ -2508,9 +2709,10 @@ elif current_view == "Live Architecture":
             </div>
             """, unsafe_allow_html=True)
         with sim_col4:
-            st.markdown("""
+            pipe_summary_txt = "🔍 Pipeline 18 Nodes · 20 Flows" if is_en else "🔍 Pipeline 18 Nœuds · 20 Flux"
+            st.markdown(f"""
             <div style="padding-top: 6px; text-align: right; color: #64748B; font-family: Consolas, monospace; font-size: 12px; font-weight: 600;">
-                🔍 Pipeline 18 Nœuds · 20 Flux
+                {pipe_summary_txt}
             </div>
             """, unsafe_allow_html=True)
 
@@ -2531,34 +2733,36 @@ elif current_view == "Live Architecture":
                 
                 # Mise à jour live du schéma SVG avec les photons et flux de l'étape active
                 with svg_placeholder:
-                    components.html(generate_pipeline_svg_html(s, height=490), height=520, scrolling=False)
+                    components.html(generate_pipeline_svg_html(s, height=490, is_english=is_en), height=520, scrolling=False)
                 
                 time.sleep(1.0)
             
             prog_bar.progress(100)
             st.session_state["pipeline_system_step"] = 8
-            st.session_state["pipeline_system_status"] = "Simulation complète exécutée avec succès (de l'Ingestion au Solveur EVRPD)"
+            st.session_state["pipeline_system_status"] = "Full simulation executed successfully (from Ingestion to EVRPD Solver)" if is_en else "Simulation complète exécutée avec succès (de l'Ingestion au Solveur EVRPD)"
             st.session_state["pipeline_system_timestamp"] = datetime.now().strftime("%H:%M:%S")
             st.session_state["arch_step"] = 8
             st.session_state["last_seen_sys_step"] = 8
             
-            status_live.markdown("""
+            sim_done_txt = "✅ Simulation completed — All 8 pipeline steps executed successfully end-to-end!" if is_en else "✅ Simulation terminée — Les 8 étapes du pipeline ont été exécutées avec succès de bout en bout !"
+            status_live.markdown(f"""
             <div style="background: #064E3B; border: 1px solid #10B981; border-radius: 6px; padding: 8px 14px; margin-top: 6px; color: #34D399; font-family: Consolas, monospace; font-size: 13px; font-weight: 700;">
-                ✅ Simulation terminée — Les 8 étapes du pipeline ont été exécutées avec succès de bout en bout !
+                {sim_done_txt}
             </div>
             """, unsafe_allow_html=True)
-            
+
             # Afficher l'étape finale EVRPD
             with svg_placeholder:
-                components.html(generate_pipeline_svg_html(8, height=490), height=520, scrolling=False)
+                components.html(generate_pipeline_svg_html(8, height=490, is_english=is_en), height=520, scrolling=False)
 
         if stop_sim:
             st.session_state["pipeline_system_step"] = 0
-            st.session_state["pipeline_system_status"] = "Système réinitialisé en mode veille (IDLE)"
+            st.session_state["pipeline_system_status"] = "System reset to standby mode (IDLE)" if is_en else "Système réinitialisé en mode veille (IDLE)"
             st.session_state["pipeline_system_timestamp"] = datetime.now().strftime("%H:%M:%S")
             st.session_state["arch_step"] = 0
             st.session_state["last_seen_sys_step"] = 0
-            st.toast("Simulation arrêtée. Réinitialisation en mode IDLE.")
+            toast_txt = "Simulation stopped. Reset to IDLE mode." if is_en else "Simulation arrêtée. Réinitialisation en mode IDLE."
+            st.toast(toast_txt)
             st.rerun()
 
     # -------------------------------------------------------------------------
@@ -2568,47 +2772,76 @@ elif current_view == "Live Architecture":
     
     det_c1, det_c2 = st.columns([1.2, 1.0])
     
+    header_desc = "#### 📖 Description & Operational Role" if is_en else "#### 📖 Description & Rôle Opérationnel"
+    header_math = "#### 📐 Underlying Mathematical Formulation" if is_en else "#### 📐 Formulation Mathématique Sous-Jacente"
+    header_io = "#### 🔄 Data Format & Tensors (I/O)" if is_en else "#### 🔄 Format des Données & Tenseurs (I/O)"
+    header_casa = "#### 📍 Concrete Application — Casablanca Metropolis" if is_en else "#### 📍 Application Concrète — Métropole de Casablanca"
+
     with det_c1:
         with st.container(border=True):
-            st.markdown(f"#### 📖 Description & Rôle Opérationnel")
+            st.markdown(header_desc)
             st.write(cur_info["desc"])
             
-            st.markdown("#### 📐 Formulation Mathématique Sous-Jacente")
+            st.markdown(header_math)
             st.latex(cur_info["math"])
             
     with det_c2:
         with st.container(border=True):
-            st.markdown("#### 🔄 Format des Données & Tenseurs (I/O)")
+            st.markdown(header_io)
             st.info(cur_info["io"])
             
-            st.markdown("#### 📍 Application Concrète — Métropole de Casablanca")
+            st.markdown(header_casa)
             st.success(cur_info["casablanca"])
 
     # Barre de liens d'action rapide vers les autres onglets
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
     with st.container(border=True):
-        st.markdown('<div class="saas-card-title">🚀 Accès Direct aux Modules Connectés</div>', unsafe_allow_html=True)
+        quick_title = '<div class="saas-card-title">🚀 Direct Access to Connected Modules</div>' if is_en else '<div class="saas-card-title">🚀 Accès Direct aux Modules Connectés</div>'
+        st.markdown(quick_title, unsafe_allow_html=True)
         nav_c1, nav_c2, nav_c3, nav_c4 = st.columns(4)
-        with nav_c1:
-            st.markdown(r"""
-            **Demand Settings**  
-            Configurer $\lambda_0$, $\beta_h$, $\gamma_d$, $\alpha_z$ et séries multivariées.
-            """)
-        with nav_c2:
-            st.markdown("""
-            **Forecasting & Benchmark**  
-            Lancer l'inférence PatchTST, GPT, LSTN et évaluer le Consensus.
-            """)
-        with nav_c3:
-            st.markdown("""
-            **Route Optimization**  
-            Résolution du solveur hybride MAPPO & NSGA-II (50 VE + 100 Drones).
-            """)
-        with nav_c4:
-            st.markdown("""
-            **Casablanca Live Map**  
-            Suivi temps réel des tournées, dépôts et zones d'exclusion aérienne (NFZ).
-            """)
+        if is_en:
+            with nav_c1:
+                st.markdown(r"""
+                **Demand Settings**  
+                Configure $\lambda_0$, $\beta_h$, $\gamma_d$, $\alpha_z$ and multivariate time series.
+                """)
+            with nav_c2:
+                st.markdown("""
+                **Forecasting & Benchmark**  
+                Run PatchTST, GPT, LSTN inference and evaluate Consensus.
+                """)
+            with nav_c3:
+                st.markdown("""
+                **Route Optimization**  
+                Run hybrid MAPPO & NSGA-II solver (50 EVs + 100 Drones).
+                """)
+            with nav_c4:
+                st.markdown("""
+                **Casablanca Live Map**  
+                Real-time tracking of routes, depots, and No-Fly Zones (NFZ).
+                """)
+        else:
+            with nav_c1:
+                st.markdown(r"""
+                **Demand Settings**  
+                Configurer $\lambda_0$, $\beta_h$, $\gamma_d$, $\alpha_z$ et séries multivariées.
+                """)
+            with nav_c2:
+                st.markdown("""
+                **Forecasting & Benchmark**  
+                Lancer l'inférence PatchTST, GPT, LSTN et évaluer le Consensus.
+                """)
+            with nav_c3:
+                st.markdown("""
+                **Route Optimization**  
+                Résolution du solveur hybride MAPPO & NSGA-II (50 VE + 100 Drones).
+                """)
+            with nav_c4:
+                st.markdown("""
+                **Casablanca Live Map**  
+                Suivi temps réel des tournées, dépôts et zones d'exclusion aérienne (NFZ).
+                """)
+
 
 
 # =============================================================================
